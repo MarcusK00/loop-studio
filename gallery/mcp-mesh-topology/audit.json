@@ -1,0 +1,15 @@
+{
+  "id": "mcp-mesh-topology",
+  "title": "Agent Orchestrator Mesh (Architecture)",
+  "mode": "showcase",
+  "useCase": "System architecture & multi-agent/MCP topology diagrams for engineering RFCs",
+  "fps": 20,
+  "pass": true,
+  "seamScore": 0.985,
+  "duplicateFrames": 0,
+  "flickerScore": 0.15,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 1463.6,
+  "totalFrames": 200
+}

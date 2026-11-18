@@ -1,0 +1,12 @@
+{
+  "title": "Amber CRT Radar",
+  "prompt": "30 fps retro amber CRT sphere and radar sweep using ordered 4x4 Bayer dithering.",
+  "mode": "ambient",
+  "style": "dither-mono",
+  "palette": "amber-crt",
+  "seconds": 3,
+  "fps": 30,
+  "width": 280,
+  "height": 280,
+  "seed": 67
+}

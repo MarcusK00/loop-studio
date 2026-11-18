@@ -1,0 +1,16 @@
+{
+  "id": "retro-crt-loader",
+  "title": "Amber CRT Radar (Bayer Dither)",
+  "mode": "ambient",
+  "useCase": "Low-bandwidth terminal/game splash screen & zero-shimmer retro loading indicator",
+  "fps": 30,
+  "pass": true,
+  "seamScore": 1.005,
+  "duplicateFrames": 0,
+  "flickerScore": 0.114,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 339.2,
+  "webpKB": 2418.4,
+  "totalFrames": 90
+}

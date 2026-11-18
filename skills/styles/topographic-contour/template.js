@@ -1,11 +1,11 @@
-// Style Pack: topographic-contour — Cyclic elevation isolines
+// Style Pack: topographic-contour — Cyclic elevation isolines with sonar sweep ticks
 export const meta = {
   mode: "ambient",
   style: "topographic-contour",
   seconds: 4,
-  fps: 24,
-  width: 360,
-  height: 360,
+  fps: 30,
+  width: 320,
+  height: 320,
   seed: 83,
   palette: "abyss"
 };
@@ -18,8 +18,8 @@ function field(nx, ny, cx, cy, kit, seed) {
 }
 
 export function render(ctx, phase, kit) {
-  const W = meta.width;
-  const H = meta.height;
+  const W = ctx.width || meta.width;
+  const H = ctx.height || meta.height;
   const C = kit.palettes[meta.palette] || kit.palettes["abyss"];
   const TAU = Math.PI * 2;
 
@@ -28,7 +28,7 @@ export function render(ctx, phase, kit) {
 
   const cx = Math.cos(TAU * phase) * 0.72;
   const cy = Math.sin(TAU * phase) * 0.72;
-  const step = 4;
+  const step = W >= 300 ? 4 : 3;
   const cols = Math.floor(W / step);
   const rows = Math.floor(H / step);
   const bands = 9;
@@ -49,10 +49,27 @@ export function render(ctx, phase, kit) {
       if (b !== bR || b !== bD) {
         const isMajor = ((b % 3) + 3) % 3 === 0;
         ctx.fillStyle = isMajor ? C.spark : C.accent;
-        ctx.globalAlpha = isMajor ? 0.95 : 0.48;
+        ctx.globalAlpha = isMajor ? 0.95 : 0.45;
         ctx.fillRect(i * step, j * step, isMajor ? step : step - 1, isMajor ? step : step - 1);
       }
     }
   }
+
+  // Subtle rotating bathymetry target ring
+  const ringR = W * 0.38;
+  ctx.globalAlpha = 0.25;
+  ctx.strokeStyle = C.line;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, ringR, 0, TAU);
+  ctx.stroke();
+
+  const ang = phase * TAU;
+  ctx.globalAlpha = 0.9;
+  ctx.fillStyle = C.spark;
+  ctx.beginPath();
+  ctx.arc(W / 2 + Math.cos(ang) * ringR, H / 2 + Math.sin(ang) * ringR, 4, 0, TAU);
+  ctx.fill();
+
   ctx.globalAlpha = 1;
 }

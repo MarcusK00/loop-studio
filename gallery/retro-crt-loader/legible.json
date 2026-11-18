@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "mode": "ambient",
+  "textElementsChecked": 2,
+  "captions": [
+    {
+      "text": "BAYER-4X4 // SYNC",
+      "contrastRatio": 15.31,
+      "minMarginPx": 13,
+      "passContrast": true
+    },
+    {
+      "text": "p:0.00",
+      "contrastRatio": 5.37,
+      "minMarginPx": 10,
+      "passContrast": true
+    }
+  ],
+  "reasons": []
+}

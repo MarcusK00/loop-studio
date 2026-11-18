@@ -2,6 +2,8 @@
   "id": "deep-sea-orbits",
   "title": "Abyssal Bioluminescence (Particle Orbit)",
   "mode": "ambient",
+  "useCase": "Calm ambient background for dark-mode apps, streams, and loading states",
+  "fps": 20,
   "pass": true,
   "seamScore": 0.972,
   "duplicateFrames": 0,

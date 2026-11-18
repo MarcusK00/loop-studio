@@ -1,0 +1,12 @@
+{
+  "title": "Editorial Kinetic Wave",
+  "prompt": "Silky 60 fps editorial kinetic typography wave repeating PHASE 0→1.",
+  "mode": "ambient",
+  "style": "kinetic-type",
+  "palette": "editorial",
+  "seconds": 2,
+  "fps": 60,
+  "width": 280,
+  "height": 280,
+  "seed": 61
+}
