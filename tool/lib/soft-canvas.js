@@ -1,111 +1,233 @@
-// Loop Studio — Pure-JS Deterministic 2D Software Canvas Engine
-// Provides zero-dependency 2D Canvas rendering for Node.js, CI, and sandboxed environments,
-// plus telemetry hooks for `loop legible` contrast and bounding-box verification.
+// Loop Studio — Pure-JS Deterministic 2D Software Canvas Engine (v2)
+// Features:
+// - Sub-pixel anti-aliased Vector SDF Font Engine (smooth curves & diagonals, cached glyph atlas)
+// - Linear & Radial Gradient support (createLinearGradient, createRadialGradient)
+// - Anti-aliased discs, rings, thick capsule strokes, and scanline polygon fills
+// - Pre-blend background contrast & bounding-box telemetry for `loop legible`
 
 import { color as colorUtil } from "./loop-kit.js";
 
-// Compact 5x7 bitmap font for printable ASCII (each char is 7 rows of 5-bit integers, MSB on left)
-const GLYPHS = {
-  " ": [0, 0, 0, 0, 0, 0, 0],
-  "!": [4, 4, 4, 4, 4, 0, 4],
-  "\"": [10, 10, 4, 0, 0, 0, 0],
-  "#": [10, 31, 10, 10, 31, 10, 0],
-  "$": [4, 15, 20, 14, 5, 30, 4],
-  "%": [25, 26, 4, 8, 19, 0, 0],
-  "&": [12, 18, 20, 8, 21, 18, 13],
-  "'": [4, 4, 0, 0, 0, 0, 0],
-  "(": [2, 4, 8, 8, 8, 4, 2],
-  ")": [8, 4, 2, 2, 2, 4, 8],
-  "*": [0, 4, 21, 14, 21, 4, 0],
-  "+": [0, 4, 4, 31, 4, 4, 0],
-  ",": [0, 0, 0, 0, 4, 4, 8],
-  "-": [0, 0, 0, 31, 0, 0, 0],
-  ".": [0, 0, 0, 0, 0, 12, 12],
-  "/": [1, 2, 4, 4, 8, 16, 0],
-  "0": [14, 17, 19, 21, 25, 17, 14],
-  "1": [4, 12, 4, 4, 4, 4, 14],
-  "2": [14, 17, 1, 6, 8, 16, 31],
-  "3": [31, 2, 4, 6, 1, 17, 14],
-  "4": [2, 6, 10, 18, 31, 2, 2],
-  "5": [31, 16, 30, 1, 1, 17, 14],
-  "6": [6, 8, 16, 30, 17, 17, 14],
-  "7": [31, 1, 2, 4, 8, 8, 8],
-  "8": [14, 17, 17, 14, 17, 17, 14],
-  "9": [14, 17, 17, 15, 1, 2, 12],
-  ":": [0, 12, 12, 0, 12, 12, 0],
-  ";": [0, 12, 12, 0, 12, 4, 8],
-  "<": [2, 4, 8, 16, 8, 4, 2],
-  "=": [0, 0, 31, 0, 31, 0, 0],
-  ">": [8, 4, 2, 1, 2, 4, 8],
-  "?": [14, 17, 1, 6, 4, 0, 4],
-  "@": [14, 17, 23, 21, 23, 16, 14],
-  "A": [14, 17, 17, 31, 17, 17, 17],
-  "B": [30, 17, 17, 30, 17, 17, 30],
-  "C": [14, 17, 16, 16, 16, 17, 14],
-  "D": [28, 18, 17, 17, 17, 18, 28],
-  "E": [31, 16, 16, 30, 16, 16, 31],
-  "F": [31, 16, 16, 30, 16, 16, 16],
-  "G": [14, 17, 16, 23, 17, 17, 15],
-  "H": [17, 17, 17, 31, 17, 17, 17],
-  "I": [14, 4, 4, 4, 4, 4, 14],
-  "J": [7, 2, 2, 2, 2, 18, 12],
-  "K": [17, 18, 20, 24, 20, 18, 17],
-  "L": [16, 16, 16, 16, 16, 16, 31],
-  "M": [17, 27, 21, 21, 17, 17, 17],
-  "N": [17, 25, 21, 19, 17, 17, 17],
-  "O": [14, 17, 17, 17, 17, 17, 14],
-  "P": [30, 17, 17, 30, 16, 16, 16],
-  "Q": [14, 17, 17, 17, 21, 18, 13],
-  "R": [30, 17, 17, 30, 20, 18, 17],
-  "S": [15, 16, 16, 14, 1, 1, 30],
-  "T": [31, 4, 4, 4, 4, 4, 4],
-  "U": [17, 17, 17, 17, 17, 17, 14],
-  "V": [17, 17, 17, 17, 17, 10, 4],
-  "W": [17, 17, 17, 21, 21, 27, 17],
-  "X": [17, 17, 10, 4, 10, 17, 17],
-  "Y": [17, 17, 10, 4, 4, 4, 4],
-  "Z": [31, 1, 2, 4, 8, 16, 31],
-  "[": [14, 8, 8, 8, 8, 8, 14],
-  "\\": [16, 8, 4, 4, 2, 1, 0],
-  "]": [14, 2, 2, 2, 2, 2, 14],
-  "^": [4, 10, 17, 0, 0, 0, 0],
-  "_": [0, 0, 0, 0, 0, 0, 31],
-  "`": [8, 4, 0, 0, 0, 0, 0],
-  "a": [0, 0, 14, 1, 15, 17, 15],
-  "b": [16, 16, 22, 25, 17, 17, 30],
-  "c": [0, 0, 14, 16, 16, 17, 14],
-  "d": [1, 1, 13, 19, 17, 17, 15],
-  "e": [0, 0, 14, 17, 31, 16, 14],
-  "f": [6, 9, 8, 28, 8, 8, 8],
-  "g": [0, 15, 17, 17, 15, 1, 14],
-  "h": [16, 16, 22, 25, 17, 17, 17],
-  "i": [4, 0, 12, 4, 4, 4, 14],
-  "j": [2, 0, 6, 2, 2, 18, 12],
-  "k": [16, 16, 18, 20, 24, 20, 18],
-  "l": [12, 4, 4, 4, 4, 4, 14],
-  "m": [0, 0, 26, 21, 21, 17, 17],
-  "n": [0, 0, 22, 25, 17, 17, 17],
-  "o": [0, 0, 14, 17, 17, 17, 14],
-  "p": [0, 0, 30, 17, 30, 16, 16],
-  "q": [0, 0, 15, 17, 15, 1, 1],
-  "r": [0, 0, 22, 25, 16, 16, 16],
-  "s": [0, 0, 15, 16, 14, 1, 30],
-  "t": [8, 8, 28, 8, 8, 9, 6],
-  "u": [0, 0, 17, 17, 17, 19, 13],
-  "v": [0, 0, 17, 17, 17, 10, 4],
-  "w": [0, 0, 17, 17, 21, 21, 10],
-  "x": [0, 0, 17, 10, 4, 10, 17],
-  "y": [0, 0, 17, 17, 15, 1, 14],
-  "z": [0, 0, 31, 2, 4, 8, 31],
-  "{": [2, 4, 4, 8, 4, 4, 2],
-  "|": [4, 4, 4, 4, 4, 4, 4],
-  "}": [8, 4, 4, 2, 4, 4, 8],
-  "~": [0, 0, 8, 21, 2, 0, 0],
-  "→": [0, 4, 2, 31, 2, 4, 0],
-  "·": [0, 0, 0, 6, 6, 0, 0],
-  "—": [0, 0, 0, 31, 0, 0, 0],
-  "×": [0, 17, 10, 4, 10, 17, 0]
+// Vector stroke definitions on a [0..8, 0..12] grid (baseline at y=10, cap-height y=1, x-height y=4, descender y=12)
+// Commands: ["L", x0, y0, x1, y1] or ["A", cx, cy, rx, ry, startDeg, endDeg] or ["P", x0, y0, x1, y1, ...]
+const VECTOR_GLYPHS = {
+  " ": [],
+  "!": [["L", 4, 1, 4, 7.5], ["A", 4, 10, 0.4, 0.4, 0, 360]],
+  "\"": [["L", 2.8, 1, 2.8, 3.8], ["L", 5.2, 1, 5.2, 3.8]],
+  "#": [["L", 2.8, 1.5, 2.2, 10], ["L", 5.8, 1.5, 5.2, 10], ["L", 1.2, 4.2, 6.8, 4.2], ["L", 1.0, 7.2, 6.6, 7.2]],
+  "$": [["A", 4, 3.8, 2.3, 1.8, 110, 350], ["L", 2.2, 4.5, 5.8, 6.8], ["A", 4, 8.0, 2.3, 1.8, -70, 170], ["L", 4, 0.6, 4, 11]],
+  "%": [["A", 2.3, 2.8, 1.3, 1.3, 0, 360], ["L", 6.4, 1.2, 1.6, 10], ["A", 5.7, 8.5, 1.3, 1.3, 0, 360]],
+  "&": [["A", 3.8, 3.0, 1.7, 1.6, 0, 360], ["A", 3.6, 7.6, 2.3, 2.2, 40, 320], ["L", 2.2, 4.2, 6.8, 10]],
+  "'": [["L", 4, 1, 3.6, 3.8]],
+  "(": [["A", 5.5, 5.6, 2.8, 5.2, 115, 245]],
+  ")": [["A", 2.5, 5.6, 2.8, 5.2, -65, 65]],
+  "*": [["L", 4, 2.2, 4, 7.8], ["L", 1.5, 3.6, 6.5, 6.4], ["L", 6.5, 3.6, 1.5, 6.4]],
+  "+": [["L", 4, 2.8, 4, 8.8], ["L", 1.2, 5.8, 6.8, 5.8]],
+  ",": [["L", 4.2, 9.2, 3.2, 11.6]],
+  "-": [["L", 1.5, 5.8, 6.5, 5.8]],
+  ".": [["A", 4, 9.6, 0.5, 0.5, 0, 360]],
+  "/": [["L", 6.2, 1, 1.8, 10.4]],
+  "0": [["A", 4, 5.5, 2.6, 4.4, 0, 360], ["L", 2.2, 8.4, 5.8, 2.6]],
+  "1": [["L", 2.2, 2.8, 4.2, 1.1], ["L", 4.2, 1.1, 4.2, 10], ["L", 2.0, 10, 6.4, 10]],
+  "2": [["A", 4, 3.3, 2.3, 2.1, 195, 405], ["L", 6.0, 4.7, 1.5, 10], ["L", 1.5, 10, 6.6, 10]],
+  "3": [["A", 3.9, 3.2, 2.2, 2.0, 200, 450], ["A", 4.0, 7.6, 2.4, 2.3, -90, 160]],
+  "4": [["L", 5.2, 1.1, 1.3, 7.2], ["L", 1.3, 7.2, 6.8, 7.2], ["L", 5.2, 1.1, 5.2, 10]],
+  "5": [["L", 6.2, 1.2, 2.0, 1.2], ["L", 2.0, 1.2, 1.8, 5.2], ["A", 4.0, 7.3, 2.5, 2.6, -135, 155]],
+  "6": [["A", 4.2, 5.5, 2.6, 4.3, 140, 260], ["A", 4.0, 7.4, 2.4, 2.5, 0, 360]],
+  "7": [["L", 1.4, 1.2, 6.6, 1.2], ["L", 6.6, 1.2, 2.8, 10]],
+  "8": [["A", 4, 3.2, 2.1, 2.0, 0, 360], ["A", 4, 7.6, 2.4, 2.3, 0, 360]],
+  "9": [["A", 4.0, 3.6, 2.4, 2.4, 0, 360], ["A", 3.8, 5.5, 2.6, 4.3, -40, 80]],
+  ":": [["A", 4, 4.4, 0.5, 0.5, 0, 360], ["A", 4, 9.4, 0.5, 0.5, 0, 360]],
+  ";": [["A", 4, 4.4, 0.5, 0.5, 0, 360], ["L", 4.2, 9.0, 3.2, 11.4]],
+  "<": [["L", 6.2, 2.4, 1.8, 5.8], ["L", 1.8, 5.8, 6.2, 9.2]],
+  "=": [["L", 1.4, 4.3, 6.6, 4.3], ["L", 1.4, 7.3, 6.6, 7.3]],
+  ">": [["L", 1.8, 2.4, 6.2, 5.8], ["L", 6.2, 5.8, 1.8, 9.2]],
+  "?": [["A", 4, 3.3, 2.3, 2.1, 195, 425], ["L", 4, 5.3, 4, 7.4], ["A", 4, 9.8, 0.45, 0.45, 0, 360]],
+  "@": [["A", 4, 5.6, 3.1, 3.8, 35, 330], ["A", 4, 5.8, 1.4, 1.6, 0, 360], ["L", 5.4, 4.2, 5.4, 7.3]],
+  "A": [["L", 1.2, 10, 4.0, 1.1], ["L", 4.0, 1.1, 6.8, 10], ["L", 2.1, 7.0, 5.9, 7.0]],
+  "B": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 4.4, 1.2], ["L", 1.6, 5.4, 4.5, 5.4], ["L", 1.6, 10, 4.5, 10], ["A", 4.4, 3.3, 1.9, 2.1, -90, 90], ["A", 4.5, 7.7, 2.1, 2.3, -90, 90]],
+  "C": [["A", 4.2, 5.6, 2.7, 4.4, 42, 318]],
+  "D": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 3.8, 1.2], ["L", 1.6, 10, 3.8, 10], ["A", 3.8, 5.6, 2.8, 4.4, -90, 90]],
+  "E": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 6.4, 1.2], ["L", 1.6, 5.5, 5.6, 5.5], ["L", 1.6, 10, 6.4, 10]],
+  "F": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 6.4, 1.2], ["L", 1.6, 5.5, 5.6, 5.5]],
+  "G": [["A", 4.2, 5.6, 2.7, 4.4, 35, 330], ["L", 4.2, 6.0, 6.8, 6.0], ["L", 6.8, 6.0, 6.8, 9.6]],
+  "H": [["L", 1.6, 1.2, 1.6, 10], ["L", 6.4, 1.2, 6.4, 10], ["L", 1.6, 5.5, 6.4, 5.5]],
+  "I": [["L", 2.2, 1.2, 5.8, 1.2], ["L", 4.0, 1.2, 4.0, 10], ["L", 2.2, 10, 5.8, 10]],
+  "J": [["L", 2.4, 1.2, 6.2, 1.2], ["L", 5.2, 1.2, 5.2, 7.6], ["A", 3.4, 7.6, 1.8, 2.3, 0, 170]],
+  "K": [["L", 1.6, 1.2, 1.6, 10], ["L", 6.4, 1.2, 1.6, 6.0], ["L", 3.2, 4.5, 6.5, 10]],
+  "L": [["L", 1.8, 1.2, 1.8, 10], ["L", 1.8, 10, 6.4, 10]],
+  "M": [["L", 1.3, 10, 1.3, 1.2], ["L", 1.3, 1.2, 4.0, 6.4], ["L", 4.0, 6.4, 6.7, 1.2], ["L", 6.7, 1.2, 6.7, 10]],
+  "N": [["L", 1.5, 10, 1.5, 1.2], ["L", 1.5, 1.2, 6.5, 10], ["L", 6.5, 10, 6.5, 1.2]],
+  "O": [["A", 4, 5.6, 2.7, 4.4, 0, 360]],
+  "P": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 4.4, 1.2], ["L", 1.6, 5.8, 4.4, 5.8], ["A", 4.4, 3.5, 2.1, 2.3, -90, 90]],
+  "Q": [["A", 4, 5.4, 2.7, 4.2, 0, 360], ["L", 4.4, 7.2, 6.8, 10.4]],
+  "R": [["L", 1.6, 1.2, 1.6, 10], ["L", 1.6, 1.2, 4.4, 1.2], ["L", 1.6, 5.6, 4.4, 5.6], ["A", 4.4, 3.4, 2.1, 2.2, -90, 90], ["L", 4.2, 5.6, 6.5, 10]],
+  "S": [["A", 4.1, 3.3, 2.3, 2.0, 145, 350], ["L", 2.1, 4.2, 5.9, 6.8], ["A", 3.9, 7.8, 2.4, 2.1, -35, 165]],
+  "T": [["L", 1.2, 1.2, 6.8, 1.2], ["L", 4.0, 1.2, 4.0, 10]],
+  "U": [["L", 1.6, 1.2, 1.6, 7.2], ["L", 6.4, 1.2, 6.4, 7.2], ["A", 4.0, 7.2, 2.4, 2.8, 0, 180]],
+  "V": [["L", 1.3, 1.2, 4.0, 10], ["L", 4.0, 10, 6.7, 1.2]],
+  "W": [["L", 1.0, 1.2, 2.4, 10], ["L", 2.4, 10, 4.0, 4.8], ["L", 4.0, 4.8, 5.6, 10], ["L", 5.6, 10, 7.0, 1.2]],
+  "X": [["L", 1.4, 1.2, 6.6, 10], ["L", 6.6, 1.2, 1.4, 10]],
+  "Y": [["L", 1.4, 1.2, 4.0, 5.6], ["L", 6.6, 1.2, 4.0, 5.6], ["L", 4.0, 5.6, 4.0, 10]],
+  "Z": [["L", 1.4, 1.2, 6.6, 1.2], ["L", 6.6, 1.2, 1.4, 10], ["L", 1.4, 10, 6.6, 10]],
+  "[": [["L", 5.2, 1, 2.6, 1], ["L", 2.6, 1, 2.6, 10.6], ["L", 2.6, 10.6, 5.2, 10.6]],
+  "\\": [["L", 1.8, 1, 6.2, 10.4]],
+  "]": [["L", 2.8, 1, 5.4, 1], ["L", 5.4, 1, 5.4, 10.6], ["L", 5.4, 10.6, 2.8, 10.6]],
+  "^": [["L", 1.8, 4.2, 4.0, 1.2], ["L", 4.0, 1.2, 6.2, 4.2]],
+  "_": [["L", 1.0, 10.8, 7.0, 10.8]],
+  "`": [["L", 3.2, 1.0, 4.6, 3.2]],
+  "a": [["A", 3.8, 7.2, 2.2, 2.7, 50, 310], ["L", 6.0, 4.2, 6.0, 10], ["A", 3.9, 5.2, 2.0, 1.4, 200, 350]],
+  "b": [["L", 1.7, 1.0, 1.7, 10], ["A", 4.0, 7.0, 2.3, 2.9, -115, 115]],
+  "c": [["A", 4.3, 7.0, 2.4, 2.9, 45, 315]],
+  "d": [["L", 6.3, 1.0, 6.3, 10], ["A", 4.0, 7.0, 2.3, 2.9, 65, 295]],
+  "e": [["L", 1.6, 6.8, 6.4, 6.8], ["A", 4.0, 7.0, 2.4, 2.9, 35, 360]],
+  "f": [["A", 4.8, 2.6, 1.5, 1.5, 180, 330], ["L", 3.3, 2.6, 3.3, 10], ["L", 1.8, 4.6, 5.4, 4.6]],
+  "g": [["A", 4.0, 6.8, 2.2, 2.6, 0, 360], ["L", 6.2, 4.2, 6.2, 10.2], ["A", 3.9, 10.2, 2.3, 1.8, 0, 165]],
+  "h": [["L", 1.7, 1.0, 1.7, 10], ["A", 4.0, 6.0, 2.2, 2.0, 180, 360], ["L", 6.2, 6.0, 6.2, 10]],
+  "i": [["A", 4.0, 1.8, 0.5, 0.5, 0, 360], ["L", 2.6, 4.2, 4.2, 4.2], ["L", 4.2, 4.2, 4.2, 10], ["L", 2.4, 10, 5.8, 10]],
+  "j": [["A", 4.8, 1.8, 0.5, 0.5, 0, 360], ["L", 4.8, 4.2, 4.8, 10.2], ["A", 3.2, 10.2, 1.6, 1.6, 0, 165]],
+  "k": [["L", 1.8, 1.0, 1.8, 10], ["L", 6.0, 4.2, 1.8, 7.2], ["L", 3.4, 6.0, 6.2, 10]],
+  "l": [["L", 2.6, 1.0, 4.2, 1.0], ["L", 4.2, 1.0, 4.2, 10], ["L", 2.4, 10, 5.8, 10]],
+  "m": [["L", 1.2, 4.2, 1.2, 10], ["A", 2.6, 5.6, 1.4, 1.5, 180, 360], ["L", 4.0, 5.6, 4.0, 10], ["A", 5.4, 5.6, 1.4, 1.5, 180, 360], ["L", 6.8, 5.6, 6.8, 10]],
+  "n": [["L", 1.7, 4.2, 1.7, 10], ["A", 4.0, 6.0, 2.2, 1.9, 180, 360], ["L", 6.2, 6.0, 6.2, 10]],
+  "o": [["A", 4.0, 7.0, 2.4, 2.9, 0, 360]],
+  "p": [["L", 1.7, 4.2, 1.7, 11.8], ["A", 4.0, 7.0, 2.3, 2.9, -115, 115]],
+  "q": [["L", 6.3, 4.2, 6.3, 11.8], ["A", 4.0, 7.0, 2.3, 2.9, 65, 295]],
+  "r": [["L", 2.2, 4.2, 2.2, 10], ["A", 4.4, 5.8, 2.1, 1.7, 180, 330]],
+  "s": [["A", 4.0, 5.5, 2.0, 1.4, 140, 345], ["L", 2.2, 6.2, 5.8, 7.6], ["A", 4.0, 8.5, 2.1, 1.4, -35, 165]],
+  "t": [["L", 3.6, 1.8, 3.6, 8.6], ["L", 1.8, 4.2, 5.8, 4.2], ["A", 4.8, 8.6, 1.2, 1.3, 90, 180]],
+  "u": [["L", 1.7, 4.2, 1.7, 8.0], ["A", 4.0, 8.0, 2.2, 1.9, 0, 180], ["L", 6.2, 4.2, 6.2, 10]],
+  "v": [["L", 1.5, 4.2, 4.0, 10], ["L", 4.0, 10, 6.5, 4.2]],
+  "w": [["L", 1.0, 4.2, 2.4, 10], ["L", 2.4, 10, 4.0, 6.0], ["L", 4.0, 6.0, 5.6, 10], ["L", 5.6, 10, 7.0, 4.2]],
+  "x": [["L", 1.6, 4.2, 6.4, 10], ["L", 6.4, 4.2, 1.6, 10]],
+  "y": [["L", 1.6, 4.2, 4.0, 9.6], ["L", 6.4, 4.2, 2.4, 11.8]],
+  "z": [["L", 1.6, 4.2, 6.4, 4.2], ["L", 6.4, 4.2, 1.6, 10], ["L", 1.6, 10, 6.4, 10]],
+  "{": [["L", 5.0, 1, 3.6, 1.6], ["L", 3.6, 1.6, 3.6, 4.8], ["L", 3.6, 4.8, 2.2, 5.8], ["L", 2.2, 5.8, 3.6, 6.8], ["L", 3.6, 6.8, 3.6, 10], ["L", 3.6, 10, 5.0, 10.6]],
+  "|": [["L", 4.0, 0.8, 4.0, 10.8]],
+  "}": [["L", 3.0, 1, 4.4, 1.6], ["L", 4.4, 1.6, 4.4, 4.8], ["L", 4.4, 4.8, 5.8, 5.8], ["L", 5.8, 5.8, 4.4, 6.8], ["L", 4.4, 6.8, 4.4, 10], ["L", 4.4, 10, 3.0, 10.6]],
+  "~": [["A", 2.6, 5.8, 1.4, 1.2, 180, 360], ["A", 5.4, 5.8, 1.4, 1.2, 0, 180]],
+  "→": [["L", 1.0, 5.8, 6.6, 5.8], ["L", 4.4, 3.4, 6.8, 5.8], ["L", 4.4, 8.2, 6.8, 5.8]],
+  "·": [["A", 4.0, 5.8, 0.7, 0.7, 0, 360]],
+  "—": [["L", 0.8, 5.8, 7.2, 5.8]],
+  "×": [["L", 1.8, 3.6, 6.2, 8.0], ["L", 6.2, 3.6, 1.8, 8.0]],
+  "✓": [["L", 1.4, 6.2, 3.3, 8.8], ["L", 3.3, 8.8, 6.8, 2.4]],
+  "π": [["L", 1.4, 4.2, 6.6, 4.2], ["L", 2.8, 4.2, 2.4, 10], ["L", 5.2, 4.2, 5.4, 10]]
 };
+
+const GLYPH_ATLAS_CACHE = new Map();
+
+function distToSegment(px, py, x0, y0, x1, y1) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const len2 = dx * dx + dy * dy;
+  if (len2 < 1e-6) return Math.hypot(px - x0, py - y0);
+  const t = Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / len2));
+  return Math.hypot(px - (x0 + t * dx), py - (y0 + t * dy));
+}
+
+function getGlyphBitmap(ch, pxSize, bold) {
+  const key = `${ch}|${pxSize}|${bold ? 1 : 0}`;
+  let cached = GLYPH_ATLAS_CACHE.get(key);
+  if (cached) return cached;
+
+  const ops = VECTOR_GLYPHS[ch] || VECTOR_GLYPHS[ch.toUpperCase()] || VECTOR_GLYPHS["?"];
+  const scale = pxSize / 11.5;
+  const w = Math.max(4, Math.ceil(8.0 * scale));
+  const h = Math.max(6, Math.ceil(12.5 * scale));
+  const alpha = new Uint8Array(w * h);
+
+  if (ops.length === 0) {
+    cached = { w, h, alpha };
+    GLYPH_ATLAS_CACHE.set(key, cached);
+    return cached;
+  }
+
+  // Convert arcs into fine polyline segments in pixel coordinates
+  const segs = [];
+  for (const op of ops) {
+    if (op[0] === "L") {
+      segs.push([op[1] * scale, op[2] * scale, op[3] * scale, op[4] * scale]);
+    } else if (op[0] === "A") {
+      const [, cx, cy, rx, ry, sDeg, eDeg] = op;
+      const steps = 14;
+      for (let i = 0; i < steps; i++) {
+        const a0 = ((sDeg + ((eDeg - sDeg) * i) / steps) * Math.PI) / 180;
+        const a1 = ((sDeg + ((eDeg - sDeg) * (i + 1)) / steps) * Math.PI) / 180;
+        segs.push([
+          (cx + Math.cos(a0) * rx) * scale,
+          (cy + Math.sin(a0) * ry) * scale,
+          (cx + Math.cos(a1) * rx) * scale,
+          (cy + Math.sin(a1) * ry) * scale
+        ]);
+      }
+    }
+  }
+
+  const strokeRadius = Math.max(0.58, (bold ? 0.88 : 0.70) * scale);
+  const feather = 0.72;
+
+  for (let py = 0; py < h; py++) {
+    const cy = py + 0.5;
+    for (let px = 0; px < w; px++) {
+      const cx = px + 0.5;
+      let minDist = Infinity;
+      for (let s = 0; s < segs.length; s++) {
+        const seg = segs[s];
+        const d = distToSegment(cx, cy, seg[0], seg[1], seg[2], seg[3]);
+        if (d < minDist) minDist = d;
+      }
+      const cov = Math.max(0, Math.min(1, (strokeRadius + feather * 0.5 - minDist) / feather));
+      if (cov > 0) {
+        alpha[py * w + px] = Math.round(cov * 255);
+      }
+    }
+  }
+
+  cached = { w, h, alpha };
+  GLYPH_ATLAS_CACHE.set(key, cached);
+  return cached;
+}
+
+class SoftGradient {
+  constructor(type, coords) {
+    this.type = type;
+    this.coords = coords;
+    this.stops = [];
+  }
+  addColorStop(offset, color) {
+    this.stops.push({ offset: Math.max(0, Math.min(1, offset)), rgba: colorUtil.parseHex(color) });
+    this.stops.sort((a, b) => a.offset - b.offset);
+  }
+  sample(px, py) {
+    if (this.stops.length === 0) return [0, 0, 0, 255];
+    if (this.stops.length === 1) return this.stops[0].rgba;
+    let t = 0;
+    if (this.type === "linear") {
+      const [x0, y0, x1, y1] = this.coords;
+      const dx = x1 - x0;
+      const dy = y1 - y0;
+      const len2 = dx * dx + dy * dy || 1;
+      t = Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / len2));
+    } else {
+      const [x0, y0, r0, x1, y1, r1] = this.coords;
+      const d = Math.hypot(px - x1, py - y1);
+      t = Math.max(0, Math.min(1, (d - r0) / Math.max(1, r1 - r0)));
+    }
+    for (let i = 0; i < this.stops.length - 1; i++) {
+      const s0 = this.stops[i];
+      const s1 = this.stops[i + 1];
+      if (t >= s0.offset && t <= s1.offset) {
+        const u = (t - s0.offset) / Math.max(1e-5, s1.offset - s0.offset);
+        return [
+          Math.round(s0.rgba[0] + (s1.rgba[0] - s0.rgba[0]) * u),
+          Math.round(s0.rgba[1] + (s1.rgba[1] - s0.rgba[1]) * u),
+          Math.round(s0.rgba[2] + (s1.rgba[2] - s0.rgba[2]) * u),
+          255
+        ];
+      }
+    }
+    return this.stops[this.stops.length - 1].rgba;
+  }
+}
 
 export class SoftCanvas2D {
   constructor(width, height) {
@@ -137,6 +259,21 @@ export class SoftCanvas2D {
 
   getContext() {
     return this;
+  }
+
+  createLinearGradient(x0, y0, x1, y1) {
+    return new SoftGradient("linear", [this._mapX(x0), this._mapY(y0), this._mapX(x1), this._mapY(y1)]);
+  }
+
+  createRadialGradient(x0, y0, r0, x1, y1, r1) {
+    return new SoftGradient("radial", [
+      this._mapX(x0),
+      this._mapY(y0),
+      r0 * this._sx,
+      this._mapX(x1),
+      this._mapY(y1),
+      r1 * this._sx
+    ]);
   }
 
   save() {
@@ -196,7 +333,12 @@ export class SoftCanvas2D {
     return y * this._sy + this._ty;
   }
 
-  _parseColor(style) {
+  _parseColor(style, px = 0, py = 0) {
+    if (style instanceof SoftGradient) {
+      const rgba = style.sample(px, py);
+      const a = Math.max(0, Math.min(1, this.globalAlpha));
+      return [rgba[0], rgba[1], rgba[2], Math.round(rgba[3] * a)];
+    }
     const rgba = colorUtil.parseHex(style);
     const a = Math.max(0, Math.min(1, this.globalAlpha));
     return [rgba[0], rgba[1], rgba[2], Math.round(rgba[3] * a)];
@@ -236,14 +378,16 @@ export class SoftCanvas2D {
   }
 
   fillRect(x, y, w, h) {
-    const [r, g, b, a] = this._parseColor(this.fillStyle);
-    if (a <= 0) return;
+    const isGrad = this.fillStyle instanceof SoftGradient;
+    const base = isGrad ? null : this._parseColor(this.fillStyle);
+    if (!isGrad && base[3] <= 0) return;
     const x0 = Math.max(0, Math.round(this._mapX(x)));
     const y0 = Math.max(0, Math.round(this._mapY(y)));
     const x1 = Math.min(this.width, Math.round(this._mapX(x + w)));
     const y1 = Math.min(this.height, Math.round(this._mapY(y + h)));
     for (let py = y0; py < y1; py++) {
       for (let px = x0; px < x1; px++) {
+        const [r, g, b, a] = isGrad ? this._parseColor(this.fillStyle, px, py) : base;
         this._blendPixel(px, py, r, g, b, a);
       }
     }
@@ -286,7 +430,7 @@ export class SoftCanvas2D {
 
     let delta = endAngle - startAngle;
     if (!ccw && delta < 0) delta += Math.PI * 2;
-    const steps = Math.max(12, Math.min(64, Math.ceil(Math.abs(delta) * mr * 0.45)));
+    const steps = Math.max(16, Math.min(72, Math.ceil(Math.abs(delta) * mr * 0.55)));
     for (let i = 0; i <= steps; i++) {
       const a = startAngle + (delta * i) / steps;
       const px = mcx + Math.cos(a) * mr;
@@ -310,7 +454,6 @@ export class SoftCanvas2D {
       this._path.push({ type: "L", x: mx1, y: my1 });
       return;
     }
-    // Smooth corner approximation with 4 segments
     const x0 = last.x;
     const y0 = last.y;
     const dx0 = x0 - mx1;
@@ -324,8 +467,8 @@ export class SoftCanvas2D {
     const sy = my1 + (dy0 / len0) * t;
     const ex = mx1 + (dx2 / len2) * t;
     const ey = my1 + (dy2 / len2) * t;
-    for (let i = 1; i <= 4; i++) {
-      const u = i / 4;
+    for (let i = 1; i <= 6; i++) {
+      const u = i / 6;
       const iu = 1 - u;
       const qx = iu * iu * sx + 2 * iu * u * mx1 + u * u * ex;
       const qy = iu * iu * sy + 2 * iu * u * my1 + u * u * ey;
@@ -344,7 +487,7 @@ export class SoftCanvas2D {
     const y2 = this._mapY(cp2y);
     const x3 = this._mapX(x);
     const y3 = this._mapY(y);
-    const steps = 16;
+    const steps = 20;
     for (let i = 1; i <= steps; i++) {
       const u = i / steps;
       const iu = 1 - u;
@@ -363,7 +506,7 @@ export class SoftCanvas2D {
     const y1 = this._mapY(cpy);
     const x2 = this._mapX(x);
     const y2 = this._mapY(y);
-    const steps = 12;
+    const steps = 14;
     for (let i = 1; i <= steps; i++) {
       const u = i / steps;
       const iu = 1 - u;
@@ -380,10 +523,10 @@ export class SoftCanvas2D {
   }
 
   fill() {
-    const [r, g, b, a] = this._parseColor(this.fillStyle);
-    if (a <= 0) return;
+    const isGrad = this.fillStyle instanceof SoftGradient;
+    const base = isGrad ? null : this._parseColor(this.fillStyle);
+    if (!isGrad && base[3] <= 0) return;
 
-    // Fast anti-aliased disc rasterizer for full circles
     if (this._circleFastPath) {
       const { cx, cy, r: rad } = this._circleFastPath;
       const x0 = Math.max(0, Math.floor(cx - rad - 1));
@@ -395,8 +538,9 @@ export class SoftCanvas2D {
         for (let px = x0; px <= x1; px++) {
           const dx = px - cx;
           const d = Math.sqrt(dx * dx + dy * dy);
-          if (d <= rad + 0.5) {
-            const cov = Math.max(0, Math.min(1, rad + 0.5 - d));
+          if (d <= rad + 0.65) {
+            const cov = Math.max(0, Math.min(1, rad + 0.65 - d));
+            const [r, g, b, a] = isGrad ? this._parseColor(this.fillStyle, px, py) : base;
             this._blendPixel(px, py, r, g, b, Math.round(a * cov));
           }
         }
@@ -429,9 +573,10 @@ export class SoftCanvas2D {
       }
       nodes.sort((u, v) => u - v);
       for (let k = 0; k < nodes.length - 1; k += 2) {
-        const x0 = Math.max(0, Math.round(nodes[k]));
-        const x1 = Math.min(this.width - 1, Math.round(nodes[k + 1]));
+        const x0 = Math.max(0, Math.floor(nodes[k]));
+        const x1 = Math.min(this.width - 1, Math.ceil(nodes[k + 1]));
         for (let x = x0; x <= x1; x++) {
+          const [r, g, b, a] = isGrad ? this._parseColor(this.fillStyle, x, y) : base;
           this._blendPixel(x, y, r, g, b, a);
         }
       }
@@ -441,40 +586,53 @@ export class SoftCanvas2D {
   stroke() {
     const [r, g, b, a] = this._parseColor(this.strokeStyle);
     if (a <= 0 || this._path.length < 2) return;
-    const hw = Math.max(0.5, (this.lineWidth * this._sx) / 2);
+    const hw = Math.max(0.55, (this.lineWidth * this._sx) / 2);
+
+    // Anti-aliased circle ring fast path
+    if (this._circleFastPath) {
+      const { cx, cy, r: rad } = this._circleFastPath;
+      const pad = Math.ceil(hw + 1.5);
+      const x0 = Math.max(0, Math.floor(cx - rad - pad));
+      const x1 = Math.min(this.width - 1, Math.ceil(cx + rad + pad));
+      const y0 = Math.max(0, Math.floor(cy - rad - pad));
+      const y1 = Math.min(this.height - 1, Math.ceil(cy + rad + pad));
+      for (let py = y0; py <= y1; py++) {
+        const dy = py - cy;
+        for (let px = x0; px <= x1; px++) {
+          const dx = px - cx;
+          const dist = Math.abs(Math.sqrt(dx * dx + dy * dy) - rad);
+          if (dist <= hw + 0.7) {
+            const cov = Math.max(0, Math.min(1, hw + 0.7 - dist));
+            this._blendPixel(px, py, r, g, b, Math.round(a * cov));
+          }
+        }
+      }
+      return;
+    }
 
     for (let i = 1; i < this._path.length; i++) {
       const p0 = this._path[i - 1];
       const p1 = this._path[i];
       if (p1.type === "M") continue;
-      this._drawSegment(p0.x, p0.y, p1.x, p1.y, hw, r, g, b, a);
+      this._drawAntiAliasedSegment(p0.x, p0.y, p1.x, p1.y, hw, r, g, b, a);
     }
   }
 
-  _drawSegment(x0, y0, x1, y1, hw, r, g, b, a) {
-    const dx = x1 - x0;
-    const dy = y1 - y0;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    if (len < 0.001) return;
+  _drawAntiAliasedSegment(x0, y0, x1, y1, hw, r, g, b, a) {
+    const pad = Math.ceil(hw + 1.2);
+    const minX = Math.max(0, Math.floor(Math.min(x0, x1) - pad));
+    const maxX = Math.min(this.width - 1, Math.ceil(Math.max(x0, x1) + pad));
+    const minY = Math.max(0, Math.floor(Math.min(y0, y1) - pad));
+    const maxY = Math.min(this.height - 1, Math.ceil(Math.max(y0, y1) + pad));
 
-    const steps = Math.ceil(len * 1.5);
-    const rad = Math.max(0.5, hw);
-    const ir = Math.ceil(rad);
-    for (let s = 0; s <= steps; s++) {
-      const u = s / steps;
-      const cx = x0 + dx * u;
-      const cy = y0 + dy * u;
-      const ix0 = Math.round(cx);
-      const iy0 = Math.round(cy);
-      if (rad <= 0.85) {
-        this._blendPixel(ix0, iy0, r, g, b, a);
-      } else {
-        for (let oy = -ir; oy <= ir; oy++) {
-          for (let ox = -ir; ox <= ir; ox++) {
-            if (ox * ox + oy * oy <= rad * rad + 0.35) {
-              this._blendPixel(ix0 + ox, iy0 + oy, r, g, b, a);
-            }
-          }
+    for (let py = minY; py <= maxY; py++) {
+      const cy = py + 0.5;
+      for (let px = minX; px <= maxX; px++) {
+        const cx = px + 0.5;
+        const d = distToSegment(cx, cy, x0, y0, x1, y1);
+        if (d <= hw + 0.65) {
+          const cov = Math.max(0, Math.min(1, hw + 0.65 - d));
+          this._blendPixel(px, py, r, g, b, Math.round(a * cov));
         }
       }
     }
@@ -484,11 +642,9 @@ export class SoftCanvas2D {
     const m = String(this.font || "13px monospace").match(/(\d+(?:\.\d+)?)px/);
     const px = m ? parseFloat(m[1]) : 13;
     const bold = /bold|[6789]00/i.test(String(this.font));
-    const effPx = px * this._sx;
-    const scale = effPx >= 12.5 ? Math.max(2, Math.round(effPx / 7.5)) : 1;
-    const charW = 5 * scale + Math.max(1, scale - 1);
-    const charH = 7 * scale;
-    return { px, bold, scale, charW, charH };
+    const effPx = Math.max(9, Math.round(px * this._sx));
+    const sample = getGlyphBitmap("M", effPx, bold);
+    return { px, effPx, bold, charW: sample.w, charH: sample.h };
   }
 
   measureText(text) {
@@ -503,7 +659,7 @@ export class SoftCanvas2D {
     const [r, g, b, a] = this._parseColor(this.fillStyle);
     if (a <= 0) return;
 
-    const { px, scale, charW, charH } = this._parseFont();
+    const { px, effPx, bold, charW, charH } = this._parseFont();
     const totalW = str.length * charW;
     let startX = this._mapX(x);
     let startY = this._mapY(y);
@@ -511,9 +667,9 @@ export class SoftCanvas2D {
     if (this.textAlign === "center") startX -= totalW / 2;
     else if (this.textAlign === "right" || this.textAlign === "end") startX -= totalW;
 
-    if (this.textBaseline === "middle") startY -= charH / 2;
-    else if (this.textBaseline === "bottom") startY -= charH;
-    else if (this.textBaseline === "alphabetic") startY -= charH * 0.8;
+    if (this.textBaseline === "middle") startY -= charH * 0.46;
+    else if (this.textBaseline === "bottom") startY -= charH * 0.9;
+    else if (this.textBaseline === "alphabetic") startY -= charH * 0.78;
 
     startX = Math.round(startX);
     startY = Math.round(startY);
@@ -538,18 +694,13 @@ export class SoftCanvas2D {
 
     for (let c = 0; c < str.length; c++) {
       const ch = str[c];
-      const rows = GLYPHS[ch] || GLYPHS[ch.toUpperCase()] || GLYPHS["?"];
+      const bmp = getGlyphBitmap(ch, effPx, bold);
       const cx0 = startX + c * charW;
-      for (let ry = 0; ry < 7; ry++) {
-        const rowBits = rows[ry];
-        if (!rowBits) continue;
-        for (let rx = 0; rx < 5; rx++) {
-          if ((rowBits >> (4 - rx)) & 1) {
-            for (let sy = 0; sy < scale; sy++) {
-              for (let sx = 0; sx < scale; sx++) {
-                this._blendPixel(cx0 + rx * scale + sx, startY + ry * scale + sy, r, g, b, a);
-              }
-            }
+      for (let gy = 0; gy < bmp.h; gy++) {
+        for (let gx = 0; gx < bmp.w; gx++) {
+          const ga = bmp.alpha[gy * bmp.w + gx];
+          if (ga > 0) {
+            this._blendPixel(cx0 + gx, startY + gy, r, g, b, (a * ga) >> 8);
           }
         }
       }

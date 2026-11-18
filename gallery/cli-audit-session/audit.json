@@ -3,11 +3,11 @@
   "title": "Loop CLI Audit Showcase (Terminal)",
   "mode": "showcase",
   "pass": true,
-  "seamScore": 0.998,
+  "seamScore": 0.989,
   "duplicateFrames": 0,
-  "flickerScore": 1.366,
+  "flickerScore": 0.89,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 805,
+  "gifKB": 1371.6,
   "totalFrames": 160
 }

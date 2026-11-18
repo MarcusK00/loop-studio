@@ -3,11 +3,11 @@
   "title": "Loop Studio Showcase (Flow Pipeline)",
   "mode": "showcase",
   "pass": true,
-  "seamScore": 1.066,
+  "seamScore": 1.032,
   "duplicateFrames": 0,
-  "flickerScore": 0.307,
+  "flickerScore": 0.745,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 779.9,
+  "gifKB": 3924.5,
   "totalFrames": 160
 }

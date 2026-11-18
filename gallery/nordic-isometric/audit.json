@@ -3,11 +3,11 @@
   "title": "Harmonic Architecture (Isometric Grid)",
   "mode": "ambient",
   "pass": true,
-  "seamScore": 0.946,
+  "seamScore": 0.927,
   "duplicateFrames": 0,
-  "flickerScore": 0.1,
+  "flickerScore": 0.169,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 326.7,
+  "gifKB": 786.9,
   "totalFrames": 80
 }
