@@ -1,0 +1,40 @@
+{
+  "pass": true,
+  "repoRoot": "/Users/marcusk/.gemini/antigravity/scratch/loop-studio",
+  "checked": 4,
+  "citations": [
+    {
+      "step": 1,
+      "source": "skills/loop-brief/SKILL.md:31",
+      "file": "skills/loop-brief/SKILL.md",
+      "line": 31,
+      "excerpt": "",
+      "valid": true
+    },
+    {
+      "step": 2,
+      "source": "rules/AGENTS.md:8",
+      "file": "rules/AGENTS.md",
+      "line": 8,
+      "excerpt": "",
+      "valid": true
+    },
+    {
+      "step": 3,
+      "source": "skills/loop-audit/SKILL.md:14",
+      "file": "skills/loop-audit/SKILL.md",
+      "line": 14,
+      "excerpt": "## What `loop audit` Measures",
+      "valid": true
+    },
+    {
+      "step": 4,
+      "source": "skills/loop-render/SKILL.md:62",
+      "file": "skills/loop-render/SKILL.md",
+      "line": 62,
+      "excerpt": "- `loop.gif` (or `showcase.gif` in showcase mode) using adaptive 256-color quantization + LZW encoding (GIF89a frame del",
+      "valid": true
+    }
+  ],
+  "reasons": []
+}

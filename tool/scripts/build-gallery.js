@@ -259,15 +259,15 @@ const GALLERY_ITEMS = [
     mode: "ambient",
     style: "kinetic-type",
     palette: "editorial",
-    useCase: "60 fps social announcement card, talk title slide, and release launch banner",
-    prompt: "Silky 60 fps editorial kinetic typography wave repeating PHASE 0→1.",
+    useCase: "60 fps social release announcement card, talk title slide, and launch banner",
+    prompt: "Silky 60 fps 4-second editorial kinetic typography wave repeating PHASE 0→1.",
     brief: {
       title: "Editorial Kinetic Wave",
-      prompt: "Silky 60 fps editorial kinetic typography wave repeating PHASE 0→1.",
+      prompt: "Silky 60 fps 4-second editorial kinetic typography wave repeating PHASE 0→1.",
       mode: "ambient",
       style: "kinetic-type",
       palette: "editorial",
-      seconds: 2,
+      seconds: 4,
       fps: 60,
       width: 280,
       height: 280,
@@ -294,6 +294,107 @@ const GALLERY_ITEMS = [
       height: 280,
       seed: 83
     }
+  },
+
+  // === Longer 60 fps Multi-Act Storytelling & Audio/Telemetry Loops ===
+  {
+    id: "git-pr-guardrails",
+    title: "Protected Git Workflow (8s @ 60fps)",
+    mode: "showcase",
+    scene: "flow",
+    palette: "studio-dark",
+    customSketch: true,
+    useCase: "GitHub workflow & CI/CD guardrails explainer showing branch protection, evals, and PR merges",
+    prompt: "8-second 60fps showcase animating feat/* -> PR + CI evals -> protected dev & main.",
+    showcase: {
+      title: "Protected Git Workflow (60fps)",
+      says: "Branch guardrails block direct pushes and require passing CI evals before merging into dev and main.",
+      seconds: 8,
+      fps: 60,
+      width: 640,
+      height: 270,
+      palette: "studio-dark",
+      scene: "flow",
+      stage: ["feat/*", "PR + CI", "dev", "main"],
+      steps: [
+        { from: 7.0, to: 1.0, caption: "branch feat/* forks from dev", source: ".github/workflows/ci.yml:5" },
+        { from: 1.0, to: 3.0, caption: "CI runs 34 eval checks", source: ".github/workflows/ci.yml:19" },
+        { from: 3.0, to: 5.0, caption: "CODEOWNERS approves the PR", source: ".github/CODEOWNERS:2" },
+        { from: 5.0, to: 7.0, caption: "merged into dev & main", source: ".github/workflows/ci.yml:4" }
+      ]
+    }
+  },
+  {
+    id: "json-to-gif-transform",
+    title: "60fps Video Transformer (8s @ 60fps)",
+    mode: "showcase",
+    scene: "transform",
+    palette: "abyss",
+    customSketch: true,
+    useCase: "Compiler, build pipeline, or media-processing explainer showing specs transforming into 60fps video",
+    prompt: "8-second 60fps transform showcase turning brief.json into 480 audited frames and MP4/WebP.",
+    showcase: {
+      title: "60fps Video Transformer",
+      says: "The Loop Studio transformer converts brief.json into 480 audited 60fps video frames.",
+      seconds: 8,
+      fps: 60,
+      width: 640,
+      height: 270,
+      palette: "abyss",
+      scene: "transform",
+      stage: ["brief.json", "60 FPS", "MP4 + WebP"],
+      steps: [
+        { from: 7.0, to: 1.0, caption: "brief.json sets 60fps target", source: "skills/loop-brief/SKILL.md:31" },
+        { from: 1.0, to: 3.0, caption: "renders 480 phase-exact frames", source: "rules/AGENTS.md:8" },
+        { from: 3.0, to: 5.0, caption: "verifies seam score & contrast", source: "skills/loop-audit/SKILL.md:14" },
+        { from: 5.0, to: 7.0, caption: "encodes 60fps MP4 & WebP", source: "skills/loop-render/SKILL.md:62" }
+      ]
+    }
+  },
+  {
+    id: "live-audio-spectrum",
+    title: "120 BPM Harmonic Spectrum (6s @ 60fps)",
+    mode: "ambient",
+    style: "kinetic-audio",
+    palette: "ember",
+    customSketch: true,
+    useCase: "Music release loop, podcast player, and WebAudio/VST visualizer synced to 120 BPM (3 bars)",
+    prompt: "6-second 60fps 120 BPM harmonic spectrum visualizer with macro phrase swell and oscilloscope wave.",
+    brief: {
+      title: "120 BPM Harmonic Spectrum",
+      prompt: "6-second 60fps 120 BPM harmonic spectrum visualizer with macro phrase swell and oscilloscope wave.",
+      mode: "ambient",
+      style: "kinetic-audio",
+      palette: "ember",
+      seconds: 6,
+      fps: 60,
+      width: 340,
+      height: 240,
+      bpm: 120,
+      seed: 120
+    }
+  },
+  {
+    id: "orbital-telemetry-watch",
+    title: "Orbital Radar Telemetry (8s @ 60fps)",
+    mode: "ambient",
+    style: "blueprint-hud",
+    palette: "blueprint",
+    customSketch: true,
+    useCase: "Satellite tracker, aerospace HUD, and DevOps live observability dashboard splash",
+    prompt: "8-second 60fps blueprint radar HUD tracking 3 satellites on tilted elliptical orbits.",
+    brief: {
+      title: "Orbital Radar Telemetry",
+      prompt: "8-second 60fps blueprint radar HUD tracking 3 satellites on tilted elliptical orbits.",
+      mode: "ambient",
+      style: "blueprint-hud",
+      palette: "blueprint",
+      seconds: 8,
+      fps: 60,
+      width: 300,
+      height: 300,
+      seed: 204
+    }
   }
 ];
 
@@ -301,22 +402,23 @@ async function buildItem(item, caps) {
   const dir = path.join(REPO_ROOT, "gallery", item.id);
   fs.mkdirSync(dir, { recursive: true });
 
-  const templatePath =
-    item.mode === "showcase"
-      ? path.join(REPO_ROOT, "skills", "scenes", item.scene, "template.js")
-      : path.join(REPO_ROOT, "skills", "styles", item.style, "template.js");
-
-  let sketchCode = fs.readFileSync(templatePath, "utf8");
-  const spec = item.mode === "showcase" ? item.showcase : item.brief;
-  sketchCode = sketchCode
-    .replace(/seconds:\s*\d+/, `seconds: ${spec.seconds}`)
-    .replace(/fps:\s*\d+/, `fps: ${spec.fps}`)
-    .replace(/width:\s*\d+/, `width: ${spec.width}`)
-    .replace(/height:\s*\d+/, `height: ${spec.height}`)
-    .replace(/palette:\s*"[^"]+"/, `palette: "${item.palette}"`);
-
   const sketchPath = path.join(dir, "sketch.js");
-  fs.writeFileSync(sketchPath, sketchCode, "utf8");
+  const spec = item.mode === "showcase" ? item.showcase : item.brief;
+  if (!item.customSketch) {
+    const templatePath =
+      item.mode === "showcase"
+        ? path.join(REPO_ROOT, "skills", "scenes", item.scene, "template.js")
+        : path.join(REPO_ROOT, "skills", "styles", item.style, "template.js");
+
+    let sketchCode = fs.readFileSync(templatePath, "utf8");
+    sketchCode = sketchCode
+      .replace(/seconds:\s*\d+/, `seconds: ${spec.seconds}`)
+      .replace(/fps:\s*\d+/, `fps: ${spec.fps}`)
+      .replace(/width:\s*\d+/, `width: ${spec.width}`)
+      .replace(/height:\s*\d+/, `height: ${spec.height}`)
+      .replace(/palette:\s*"[^"]+"/, `palette: "${item.palette}"`);
+    fs.writeFileSync(sketchPath, sketchCode, "utf8");
+  }
 
   if (item.mode === "showcase") {
     fs.writeFileSync(path.join(dir, "showcase.json"), JSON.stringify(item.showcase, null, 2) + "\n", "utf8");

@@ -2,7 +2,7 @@
 export const meta = {
   mode: "ambient",
   style: "kinetic-type",
-  seconds: 2,
+  seconds: 4,
   fps: 60,
   width: 280,
   height: 280,

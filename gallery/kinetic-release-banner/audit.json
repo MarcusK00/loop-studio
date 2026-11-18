@@ -2,15 +2,15 @@
   "id": "kinetic-release-banner",
   "title": "Editorial Kinetic Wave (60 fps Type)",
   "mode": "ambient",
-  "useCase": "60 fps social announcement card, talk title slide, and release launch banner",
+  "useCase": "60 fps social release announcement card, talk title slide, and launch banner",
   "fps": 60,
   "pass": true,
-  "seamScore": 0.987,
+  "seamScore": 0.968,
   "duplicateFrames": 0,
-  "flickerScore": 0.238,
+  "flickerScore": 0.456,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 704.1,
-  "webpKB": 691.5,
-  "totalFrames": 120
+  "gifKB": 1408.1,
+  "webpKB": 1383.2,
+  "totalFrames": 240
 }

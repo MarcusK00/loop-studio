@@ -1,0 +1,12 @@
+{
+  "title": "Orbital Radar Telemetry",
+  "prompt": "8-second 60fps blueprint radar HUD tracking 3 satellites on tilted elliptical orbits.",
+  "mode": "ambient",
+  "style": "blueprint-hud",
+  "palette": "blueprint",
+  "seconds": 8,
+  "fps": 60,
+  "width": 300,
+  "height": 300,
+  "seed": 204
+}

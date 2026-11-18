@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T17:55:40.944Z",
+  "generatedAt": "2026-11-18T18:06:59.266Z",
   "items": [
     {
       "id": "loop-studio",
@@ -157,17 +157,17 @@
       "id": "kinetic-release-banner",
       "title": "Editorial Kinetic Wave (60 fps Type)",
       "mode": "ambient",
-      "useCase": "60 fps social announcement card, talk title slide, and release launch banner",
+      "useCase": "60 fps social release announcement card, talk title slide, and launch banner",
       "fps": 60,
       "pass": true,
-      "seamScore": 0.987,
+      "seamScore": 0.968,
       "duplicateFrames": 0,
-      "flickerScore": 0.238,
+      "flickerScore": 0.456,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 704.1,
-      "webpKB": 691.5,
-      "totalFrames": 120
+      "gifKB": 1408.1,
+      "webpKB": 1383.2,
+      "totalFrames": 240
     },
     {
       "id": "sonar-bathymetry",
@@ -184,6 +184,70 @@
       "gifKB": 440.8,
       "webpKB": 1356.2,
       "totalFrames": 90
+    },
+    {
+      "id": "git-pr-guardrails",
+      "title": "Protected Git Workflow (8s @ 60fps)",
+      "mode": "showcase",
+      "useCase": "GitHub workflow & CI/CD guardrails explainer showing branch protection, evals, and PR merges",
+      "fps": 60,
+      "pass": true,
+      "seamScore": 1.148,
+      "duplicateFrames": 0,
+      "flickerScore": 0.736,
+      "legiblePass": true,
+      "sourcesPass": true,
+      "gifKB": 6539.7,
+      "webpKB": 3906.6,
+      "totalFrames": 480
+    },
+    {
+      "id": "json-to-gif-transform",
+      "title": "60fps Video Transformer (8s @ 60fps)",
+      "mode": "showcase",
+      "useCase": "Compiler, build pipeline, or media-processing explainer showing specs transforming into 60fps video",
+      "fps": 60,
+      "pass": true,
+      "seamScore": 1.005,
+      "duplicateFrames": 0,
+      "flickerScore": 0.103,
+      "legiblePass": true,
+      "sourcesPass": true,
+      "gifKB": 5008.7,
+      "webpKB": 4697.5,
+      "totalFrames": 480
+    },
+    {
+      "id": "live-audio-spectrum",
+      "title": "120 BPM Harmonic Spectrum (6s @ 60fps)",
+      "mode": "ambient",
+      "useCase": "Music release loop, podcast player, and WebAudio/VST visualizer synced to 120 BPM (3 bars)",
+      "fps": 60,
+      "pass": true,
+      "seamScore": 1.05,
+      "duplicateFrames": 0,
+      "flickerScore": 0.261,
+      "legiblePass": true,
+      "sourcesPass": true,
+      "gifKB": 1804,
+      "webpKB": 2134.8,
+      "totalFrames": 360
+    },
+    {
+      "id": "orbital-telemetry-watch",
+      "title": "Orbital Radar Telemetry (8s @ 60fps)",
+      "mode": "ambient",
+      "useCase": "Satellite tracker, aerospace HUD, and DevOps live observability dashboard splash",
+      "fps": 60,
+      "pass": true,
+      "seamScore": 1.037,
+      "duplicateFrames": 0,
+      "flickerScore": 0.045,
+      "legiblePass": true,
+      "sourcesPass": true,
+      "gifKB": 5494.6,
+      "webpKB": 4307.1,
+      "totalFrames": 480
     }
   ]
 }
