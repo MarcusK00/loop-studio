@@ -1,21 +1,21 @@
 {
   "name": "loop-studio",
   "displayName": "Loop Studio",
-  "version": "1.0.0",
-  "description": "Produce verified, seamless animations and repo showcase loops (GIF, MP4, WebM, PNG) driven by deterministic phase math, seam analysis, legibility checks, and cold-read evaluation.",
+  "version": "2.0.0",
+  "description": "Deterministic HTML/WebGL2 browser capture, dual-theme dark/light README bundles, and universal loop/source-drift auditing.",
   "author": {
     "name": "Marcusk00",
     "url": "https://github.com/Marcusk00"
   },
-  "homepage": "https://github.com/Marcusk00/loop-studio",
+  "homepage": "https://github.com/MarcusK00/loop-studio",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Marcusk00/loop-studio.git"
+    "url": "https://github.com/MarcusK00/loop-studio.git"
   },
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
-    "Make a 10-second seamless showcase loop explaining what this repository does for the README",
-    "Create a 4-second square ambient loop: deep sea, slow, bioluminescent particle orbits",
-    "Audit our current showcase sketch for seam jumps, WCAG text legibility, and source accuracy"
+    "Create a dark and light README animated showcase grounded in this repository's real source files",
+    "Turn this PR diff into a crisp 24fps code-diff loop for the changelog",
+    "Audit our README animation video and showcase.json for loop seams, contrast, and doc drift"
   ]
 }

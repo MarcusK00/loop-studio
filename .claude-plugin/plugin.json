@@ -1,21 +1,21 @@
 {
   "name": "loop-studio",
-  "version": "1.0.0",
-  "description": "Produce verified, seamless animations and repo showcase loops (GIF, MP4, WebM, PNG) driven by deterministic phase math, seam analysis, legibility checks, and cold-read evaluation.",
+  "version": "2.0.0",
+  "description": "Deterministic HTML/WebGL2 browser capture, dual-theme dark/light README bundles, and universal loop/source-drift auditing.",
   "author": {
     "name": "Marcusk00",
     "url": "https://github.com/Marcusk00"
   },
-  "homepage": "https://github.com/Marcusk00/loop-studio",
-  "repository": "https://github.com/Marcusk00/loop-studio",
+  "homepage": "https://github.com/MarcusK00/loop-studio",
+  "repository": "https://github.com/MarcusK00/loop-studio",
   "license": "MIT",
   "keywords": [
+    "readme-demo",
     "animation",
     "seamless-loop",
-    "showcase",
+    "webp",
     "gif",
-    "mp4",
-    "generative-art",
-    "readme"
+    "wcag",
+    "audit"
   ]
 }

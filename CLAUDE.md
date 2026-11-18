@@ -1,3 +1,3 @@
-# Loop Studio — Claude Code & Agent Guide
+# Loop Studio — Claude Code Guide
 
-See [AGENTS.md](./AGENTS.md) and [rules/AGENTS.md](./rules/AGENTS.md) for the complete phase contract, verification gates, skill routing table, and `loop` CLI command reference.
+See [AGENTS.md](./AGENTS.md), [rules/AGENTS.md](./rules/AGENTS.md), [skills/loop-studio/SKILL.md](./skills/loop-studio/SKILL.md), and [skills/loop-audit/SKILL.md](./skills/loop-audit/SKILL.md).

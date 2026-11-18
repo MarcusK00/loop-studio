@@ -2,3 +2,12 @@ node_modules/
 .DS_Store
 *.log
 tmp/
+examples/**/*.gif
+examples/**/*.webp
+examples/**/*.mp4
+examples/**/*.webm
+examples/**/*.png
+examples/**/audit.json
+examples/**/seam.json
+examples/**/legible.json
+examples/**/sources.json

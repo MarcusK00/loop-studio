@@ -10,8 +10,8 @@ You are an unprimed first-time viewer evaluating a showcase animation storyboard
 ## Strict Isolation Rules
 
 1. **Read ONLY the image file (`storyboard.png`)** passed in your prompt.
-2. **NEVER read** `README.md`, `showcase.json`, `brief.json`, `sketch.js`, `package.json`, or any other file in the workspace. Doing so contaminates the cold read and invalidates the test.
-3. Base your interpretation strictly on the visual stage boxes, moving items, arrows, code/terminal text, and bottom captions visible inside `storyboard.png`.
+2. **NEVER read** `README.md`, `showcase.json`, `brief.json`, `scene.html`, `shader.frag`, `sketch.js`, `package.json`, or any other file in the workspace. Doing so contaminates the cold read and invalidates the test.
+3. Base your interpretation strictly on the visual UI panels, code diffs, diagrams, and captions visible inside `storyboard.png`.
 
 ## Required Output Format
 

@@ -4,35 +4,21 @@
 
 ## Quick Command Reference
 
-Use the `loop` CLI (`npx loop` or `node tool/bin/loop.js`) for every stage of the workflow:
+| Command | Purpose |
+| :--- | :--- |
+| `loop new <dir> [--template html\|code-diff\|shader]` | Scaffold a clean `scene.html` / `shader.frag` starter with `showcase.json` / `brief.json` |
+| `loop sheet <dir>` | Render a numbered contact sheet (`sheet.png`) |
+| `loop story <dir>` | Render Frame `0` + step midpoints into `storyboard.png` for cold reading |
+| `loop seam <dir\|video>` | Measure wrap-seam RMS delta, duplicate frames, and flicker (works on projects or external videos via `ffmpeg`) |
+| `loop legible <dir> [--themes dark,light]` | Verify stage labels, reading time, DOM overflow, `400px` width, and WCAG `4.5:1` contrast |
+| `loop source-check <dir\|showcase.json> [--repo .]` | Verify repo-relative `file:line` citations and `"match"` doc-drift tokens |
+| `loop audit <dir\|video> [--repo .] [--themes dark,light]` | Unified verification gate (`0` pass, `1` fail, `2` missing runtime / invalid input) |
+| `loop render <dir> [--themes dark,light] [--formats webp,gif,mp4]` | Export verified WebP, GIF, MP4, PNG, and GitHub `<picture>` embeds |
+| `loop serve <dir>` | Launch interactive phase scrubber, dark/light switcher, and `400px` preview |
+| `loop doctor` | Inspect available browser engines and encoders/decoders |
 
-| Command | Purpose | Output |
-| :--- | :--- | :--- |
-| `loop new <dir> [--mode showcase\|ambient] [--style <id>] [--scene <id>] [--fps <n>]` | Scaffold a loop project with `brief.json` / `showcase.json`, `sketch.js`, and preview HTML | `<dir>/sketch.js`, `<dir>/index.html` |
-| `loop sheet <dir> [--cols 4] [--every 8]` | Render every Nth frame into a numbered contact sheet for visual critique | `<dir>/sheet.png` |
-| `loop story <dir>` | Render Frame `0` plus the midpoint frame of each step in `showcase.json` | `<dir>/storyboard.png` |
-| `loop seam <dir>` | Measure frame-to-frame pixel deltas, last-to-first seam ratio, duplicate frames, and flicker | `<dir>/seam.json` |
-| `loop legible <dir>` | Audit caption reading time, WCAG contrast (`>= 4.5:1`), safe margins, and phone-width readability | `<dir>/legible.json` |
-| `loop source-check <dir> [--repo <path>]` | Verify every `file:line` citation in `showcase.json` exists in the target repository | `<dir>/sources.json` |
-| `loop audit <dir>` | Run `seam`, `legible`, and `source-check` together as a unified quality gate | `<dir>/audit.json` |
-| `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png\|all]` | Render full-resolution `loop.gif` / `showcase.gif`, `poster.png`, `loop.mp4` (FFmpeg or macOS AVFoundation), Animated WebP, and WebM at up to `60–120 fps` | `<dir>/loop.gif`, `<dir>/loop.mp4`, `<dir>/poster.png` |
-| `loop serve <dir> [--port 4173]` | Launch interactive browser workbench with phase scrubber, seam oscilloscope, and mobile preview | `http://localhost:4173` |
-| `loop doctor` | Check runtime capabilities (Pure-JS engine, Headless Chrome/Chromium, FFmpeg) | JSON / terminal diagnostic |
+## Skills & Agent
 
-## Skill Routing
-
-1. Start every session by reading [`skills/loop-studio/SKILL.md`](skills/loop-studio/SKILL.md).
-2. For **Showcase loops** ("animate what this repo does"), load:
-   - [`skills/loop-showcase/SKILL.md`](skills/loop-showcase/SKILL.md)
-   - [`skills/loop-timeline/SKILL.md`](skills/loop-timeline/SKILL.md)
-   - [`skills/loop-type/SKILL.md`](skills/loop-type/SKILL.md)
-   - One scene pack from `skills/scenes/<scene>/SKILL.md` (`flow`, `transform`, `terminal`, `code`, `interface`, `structure`, `architecture`, or `benchmark`)
-   - [`skills/loop-cold-read/SKILL.md`](skills/loop-cold-read/SKILL.md)
-3. For **Ambient loops** ("make a looping background / shader / generative animation"), load:
-   - [`skills/loop-brief/SKILL.md`](skills/loop-brief/SKILL.md)
-   - [`skills/loop-math/SKILL.md`](skills/loop-math/SKILL.md)
-   - [`skills/loop-compose/SKILL.md`](skills/loop-compose/SKILL.md)
-   - [`skills/loop-palette/SKILL.md`](skills/loop-palette/SKILL.md)
-   - One style pack from `skills/styles/<style>/SKILL.md` (`flow-field`, `particle-orbit`, `sdf-raymarch`, `kinetic-type`, `dither-mono`, `isometric-grid`, `blueprint-cad`, or `topographic-contour`)
-   - [`skills/loop-critique/SKILL.md`](skills/loop-critique/SKILL.md)
-4. Always use [`skills/loop-render/SKILL.md`](skills/loop-render/SKILL.md) and [`skills/loop-audit/SKILL.md`](skills/loop-audit/SKILL.md) before completing the session.
+- [`skills/loop-studio/SKILL.md`](skills/loop-studio/SKILL.md) — Author dual-theme README demos, PR code-diffs, UI walkthroughs, and WebGL2 loops.
+- [`skills/loop-audit/SKILL.md`](skills/loop-audit/SKILL.md) — Audit Loop projects or external `.mp4`/`.gif`/`.webp` outputs from any tool.
+- [`agents/loop-cold-reader.md`](agents/loop-cold-reader.md) — Zero-context comprehension check on `storyboard.png`.
