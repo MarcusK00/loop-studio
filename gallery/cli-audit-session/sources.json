@@ -8,7 +8,7 @@
       "source": "docs/tool.md:22",
       "file": "docs/tool.md",
       "line": 22,
-      "excerpt": "Renders all frames `0..N-1` at full resolution and outputs `showcase.gif` / `loop.gif` and `poster.png` (plus `loop.mp4`",
+      "excerpt": "Renders all frames `0..N-1` at full resolution and outputs `showcase.gif` / `loop.gif`, `poster.png`, `loop.mp4` (via FF",
       "valid": true
     },
     {

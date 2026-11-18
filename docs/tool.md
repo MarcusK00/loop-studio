@@ -18,8 +18,8 @@ The `loop` command (`tool/bin/loop.js`) drives project scaffolding, preview cont
    Verifies every `"source": "file:line"` in `showcase.json` exists in the repository and writes `<dir>/sources.json`.
 7. `loop audit <dir> [--repo <root>]`
    Runs `seam`, `legible`, and `source-check` together and writes `<dir>/audit.json`.
-8. `loop render <dir>`
-   Renders all frames `0..N-1` at full resolution and outputs `showcase.gif` / `loop.gif` and `poster.png` (plus `loop.mp4` / `loop.webm` when FFmpeg is present).
+8. `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png|all] [--width <n>] [--height <n>]`
+   Renders all frames `0..N-1` at full resolution and outputs `showcase.gif` / `loop.gif`, `poster.png`, `loop.mp4` (via FFmpeg or native macOS AVFoundation at `30/60/120 fps`), Animated `.webp` (via `cwebp`+`webpmux` or FFmpeg), and `.webm` (when FFmpeg is present).
 9. `loop serve <dir> [--port 4173]`
    Opens the interactive browser workbench with phase scrubber and mobile width toggle.
 10. `loop doctor`

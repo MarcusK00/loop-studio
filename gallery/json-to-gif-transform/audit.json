@@ -1,0 +1,16 @@
+{
+  "id": "json-to-gif-transform",
+  "title": "60fps Video Transformer (8s @ 60fps)",
+  "mode": "showcase",
+  "useCase": "Compiler, build pipeline, or media-processing explainer showing specs transforming into 60fps video",
+  "fps": 60,
+  "pass": true,
+  "seamScore": 1.005,
+  "duplicateFrames": 0,
+  "flickerScore": 0.103,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 5008.7,
+  "webpKB": 3798.9,
+  "totalFrames": 480
+}

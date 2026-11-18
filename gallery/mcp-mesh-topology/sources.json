@@ -1,0 +1,40 @@
+{
+  "pass": true,
+  "repoRoot": "/Users/marcusk/.gemini/antigravity/scratch/loop-studio",
+  "checked": 4,
+  "citations": [
+    {
+      "step": 1,
+      "source": "AGENTS.md:9",
+      "file": "AGENTS.md",
+      "line": 9,
+      "excerpt": "| Command | Purpose | Output |",
+      "valid": true
+    },
+    {
+      "step": 2,
+      "source": "skills/loop-render/SKILL.md:24",
+      "file": "skills/loop-render/SKILL.md",
+      "line": 24,
+      "excerpt": "### 3. Showcase Storyboard (`loop story`)",
+      "valid": true
+    },
+    {
+      "step": 3,
+      "source": "agents/loop-cold-reader.md:10",
+      "file": "agents/loop-cold-reader.md",
+      "line": 10,
+      "excerpt": "## Strict Isolation Rules",
+      "valid": true
+    },
+    {
+      "step": 4,
+      "source": "skills/loop-audit/SKILL.md:9",
+      "file": "skills/loop-audit/SKILL.md",
+      "line": 9,
+      "excerpt": "",
+      "valid": true
+    }
+  ],
+  "reasons": []
+}

@@ -6,10 +6,12 @@
 //    each fail the exact check designed to catch them.
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { analyzeSeam, analyzeLegibility, analyzeSources } from "../lib/analyzers.js";
 import { renderAllFrames } from "../lib/compositor.js";
+import { detectCapabilities, encodeAnimatedWebP } from "../lib/encoders.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -179,10 +181,43 @@ function testGalleryArtifacts() {
   }
 }
 
+async function testHighFpsRendering() {
+  console.log("\n=== 4. High-FPS (60 fps) Video Pipeline ===");
+  const p = path.join(REPO_ROOT, "skills", "styles", "particle-orbit", "template.js");
+  const mod = await import(pathToFileURL(p).href);
+  const { frames, width, height, fps, totalFrames } = renderAllFrames(mod, {
+    width: 160,
+    height: 160,
+    seconds: 1,
+    fps: 60
+  });
+  const seam = analyzeSeam(frames, width, height);
+  assert(
+    fps === 60 && totalFrames === 60 && frames.length === 60 && seam.pass,
+    `60fps render produces 60 exact frames with passing seam (seamScore=${seam.seamScore}, dup=${seam.duplicateFrames})`
+  );
+
+  const caps = detectCapabilities();
+  if (caps.cwebpPath && caps.webpmuxPath) {
+    const tmpWebp = path.join(os.tmpdir(), `loop-eval-60fps-${process.pid}.webp`);
+    try {
+      const res = encodeAnimatedWebP(frames.slice(0, 12), width, height, 60, tmpWebp);
+      const header = fs.readFileSync(tmpWebp).subarray(0, 12).toString("ascii");
+      assert(
+        res.bytes > 0 && header.startsWith("RIFF") && header.endsWith("WEBP"),
+        `60fps Animated WebP encodes cleanly (${res.bytes} bytes via ${res.backend})`
+      );
+    } finally {
+      if (fs.existsSync(tmpWebp)) fs.unlinkSync(tmpWebp);
+    }
+  }
+}
+
 async function main() {
   await testTemplates();
   testNegativeGates();
   testGalleryArtifacts();
+  await testHighFpsRendering();
 
   console.log(`\n========================================`);
   console.log(`Loop Studio Evals: ${passed} passed, ${failed} failed`);

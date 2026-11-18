@@ -2,12 +2,14 @@
   "id": "cad-planetary",
   "title": "Epicyclic Telemetry (Blueprint CAD)",
   "mode": "ambient",
+  "useCase": "Robotics, hardware, CAD, and precision engineering repo badges",
+  "fps": 20,
   "pass": true,
-  "seamScore": 1.016,
+  "seamScore": 1.023,
   "duplicateFrames": 0,
   "flickerScore": 0.031,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 762.6,
+  "gifKB": 1193.9,
   "totalFrames": 80
 }

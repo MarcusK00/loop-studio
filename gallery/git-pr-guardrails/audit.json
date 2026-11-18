@@ -1,0 +1,16 @@
+{
+  "id": "git-pr-guardrails",
+  "title": "Protected Git Workflow (8s @ 60fps)",
+  "mode": "showcase",
+  "useCase": "GitHub workflow & CI/CD guardrails explainer showing branch protection, evals, and PR merges",
+  "fps": 60,
+  "pass": true,
+  "seamScore": 1.148,
+  "duplicateFrames": 0,
+  "flickerScore": 0.736,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 6539.7,
+  "webpKB": 3114.5,
+  "totalFrames": 480
+}
