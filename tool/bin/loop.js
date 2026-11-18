@@ -197,7 +197,8 @@ async function cmdSeam(targetDir, flags) {
   const report = analyzeSeam(frames, evalW, evalH);
   const outPath = path.join(absDir, "seam.json");
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2) + "\n", "utf8");
-  console.log(JSON.stringify({ file: outPath, ...report }, null, 2));
+  const { normalizedSteps: _omit, ...summary } = report;
+  console.log(JSON.stringify({ file: outPath, ...summary }, null, 2));
   if (!report.pass) process.exitCode = 1;
 }
 
