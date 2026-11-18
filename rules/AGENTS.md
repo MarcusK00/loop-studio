@@ -66,3 +66,7 @@ Never run a final `loop render` or hand deliverables to the user before running 
   - `loop source-check <dir>` -> verify every `"source"` in `showcase.json` resolves to an existing file and valid line range.
   - **Cold Read**: Invoke the `loop-cold-reader` subagent (or `loop-cold-read` skill) with *only* `storyboard.png` to confirm an unprimed reader can state what the project does in one sentence matching `showcase.json#says`.
 - **3-Round Revision Cap**: Repeat the inspect -> revise -> re-check cycle at most **3 rounds**. If any check still fails after Round 3, stop and report the exact failing metric and trade-off to the user.
+
+## 6. Concise Output
+
+- Keep user-facing updates and final replies brief (2–5 short lines): state the generated files, `seamScore`, and any key change or blocker. Never print long recaps, repeated status walls, or raw frame-delta arrays.
