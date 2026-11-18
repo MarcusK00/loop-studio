@@ -28,7 +28,7 @@ const GALLERY_ITEMS = [
       seconds: 10,
       fps: 16,
       width: 800,
-      height: 320,
+      height: 360,
       palette: "studio-dark",
       scene: "flow",
       stage: ["request", "sketch", "check", "loop.gif"],

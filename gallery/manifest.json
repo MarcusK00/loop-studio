@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-11-18T16:19:41.106Z",
+  "generatedAt": "2026-11-18T16:52:10.718Z",
   "items": [
     {
       "id": "loop-studio",
       "title": "Loop Studio Showcase (Flow Pipeline)",
       "mode": "showcase",
       "pass": true,
-      "seamScore": 1.066,
+      "seamScore": 1.032,
       "duplicateFrames": 0,
-      "flickerScore": 0.307,
+      "flickerScore": 0.745,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 779.9,
+      "gifKB": 3924.5,
       "totalFrames": 160
     },
     {
@@ -19,12 +19,12 @@
       "title": "Loop CLI Audit Showcase (Terminal)",
       "mode": "showcase",
       "pass": true,
-      "seamScore": 0.998,
+      "seamScore": 0.989,
       "duplicateFrames": 0,
-      "flickerScore": 1.366,
+      "flickerScore": 0.89,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 805,
+      "gifKB": 1371.6,
       "totalFrames": 160
     },
     {
@@ -32,12 +32,12 @@
       "title": "Abyssal Bioluminescence (Particle Orbit)",
       "mode": "ambient",
       "pass": true,
-      "seamScore": 0.974,
+      "seamScore": 0.972,
       "duplicateFrames": 0,
       "flickerScore": 0.024,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 1173.2,
+      "gifKB": 1247.8,
       "totalFrames": 80
     },
     {
@@ -45,12 +45,12 @@
       "title": "Arctic Currents (Flow Field)",
       "mode": "ambient",
       "pass": true,
-      "seamScore": 1.013,
+      "seamScore": 1.037,
       "duplicateFrames": 0,
-      "flickerScore": 0.025,
+      "flickerScore": 0.028,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 1674.1,
+      "gifKB": 3076.4,
       "totalFrames": 80
     },
     {
@@ -58,12 +58,12 @@
       "title": "Harmonic Architecture (Isometric Grid)",
       "mode": "ambient",
       "pass": true,
-      "seamScore": 0.946,
+      "seamScore": 0.927,
       "duplicateFrames": 0,
-      "flickerScore": 0.1,
+      "flickerScore": 0.169,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 326.7,
+      "gifKB": 786.9,
       "totalFrames": 80
     },
     {
@@ -71,12 +71,12 @@
       "title": "Epicyclic Telemetry (Blueprint CAD)",
       "mode": "ambient",
       "pass": true,
-      "seamScore": 1.016,
+      "seamScore": 1.023,
       "duplicateFrames": 0,
       "flickerScore": 0.031,
       "legiblePass": true,
       "sourcesPass": true,
-      "gifKB": 762.6,
+      "gifKB": 1193.9,
       "totalFrames": 80
     }
   ]

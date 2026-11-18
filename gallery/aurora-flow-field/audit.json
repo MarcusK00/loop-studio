@@ -3,11 +3,11 @@
   "title": "Arctic Currents (Flow Field)",
   "mode": "ambient",
   "pass": true,
-  "seamScore": 1.013,
+  "seamScore": 1.037,
   "duplicateFrames": 0,
-  "flickerScore": 0.025,
+  "flickerScore": 0.028,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 1674.1,
+  "gifKB": 3076.4,
   "totalFrames": 80
 }

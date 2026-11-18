@@ -16,7 +16,7 @@
       "passReadingTime": true,
       "contrastRatio": 16.56,
       "passContrast": true,
-      "minEdgeMarginPx": 38,
+      "minEdgeMarginPx": 37,
       "phoneFontPx": 6.5,
       "passMobileWidth": true,
       "pass": true
@@ -31,7 +31,7 @@
       "passReadingTime": true,
       "contrastRatio": 16.56,
       "passContrast": true,
-      "minEdgeMarginPx": 38,
+      "minEdgeMarginPx": 37,
       "phoneFontPx": 6.5,
       "passMobileWidth": true,
       "pass": true
@@ -46,7 +46,7 @@
       "passReadingTime": true,
       "contrastRatio": 16.56,
       "passContrast": true,
-      "minEdgeMarginPx": 38,
+      "minEdgeMarginPx": 37,
       "phoneFontPx": 6.5,
       "passMobileWidth": true,
       "pass": true
@@ -61,7 +61,7 @@
       "passReadingTime": true,
       "contrastRatio": 16.56,
       "passContrast": true,
-      "minEdgeMarginPx": 38,
+      "minEdgeMarginPx": 37,
       "phoneFontPx": 6.5,
       "passMobileWidth": true,
       "pass": true
