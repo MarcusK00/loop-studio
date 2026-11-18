@@ -8,3 +8,4 @@ export * from "./lib/compositor.js";
 export * from "./lib/harness.js";
 export * from "./lib/renderer.js";
 export * from "./lib/server.js";
+export * from "./lib/generators.js";

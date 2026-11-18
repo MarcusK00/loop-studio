@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Loop Studio CLI (`loop`)
-// Commands: new, sheet, story, seam, legible, source-check, audit, render, serve, doctor
+// Commands: new, diff, term, sheet, story, seam, legible, source-check, audit, render, serve, doctor
 
 import fs from "node:fs";
 import path from "node:path";
@@ -27,6 +27,7 @@ import {
   renderProjectStoryboard
 } from "../lib/compositor.js";
 import { generatePreviewHtml, serveLoop } from "../lib/server.js";
+import { generateDiffProject, generateTerminalProject } from "../lib/generators.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -674,11 +675,54 @@ function cmdDoctor() {
   );
 }
 
+function cmdDiff(targetDir, flags) {
+  const repoRoot = flags.repo ? path.resolve(flags.repo) : process.cwd();
+  const res = generateDiffProject({
+    outDir: targetDir,
+    repoRoot,
+    diffFile: flags.file ? path.resolve(flags.file) : null,
+    staged: Boolean(flags.staged),
+    range: typeof flags.range === "string" ? flags.range : null,
+    title: typeof flags.title === "string" ? flags.title : null,
+    palette: typeof flags.palette === "string" ? flags.palette : "studio-dark",
+    seconds: flags.seconds ? Number(flags.seconds) : 9,
+    fps: flags.fps ? Number(flags.fps) : 24,
+    maxLines: flags["max-lines"] ? Number(flags["max-lines"]) : 7
+  });
+  console.log(JSON.stringify({ status: "created", generator: "diff", ...res }, null, 2));
+}
+
+function cmdTerm(targetDir, flags) {
+  const repoRoot = flags.repo ? path.resolve(flags.repo) : process.cwd();
+  let outputText = null;
+  if (typeof flags.input === "string") {
+    outputText = fs.readFileSync(path.resolve(flags.input), "utf8");
+  } else if (typeof flags.output === "string") {
+    outputText = flags.output.replace(/\\n/g, "\n");
+  }
+  const res = generateTerminalProject({
+    outDir: targetDir,
+    repoRoot,
+    cmd: typeof flags.cmd === "string" ? flags.cmd : null,
+    label: typeof flags.label === "string" ? flags.label : null,
+    outputText,
+    title: typeof flags.title === "string" ? flags.title : "CLI Session",
+    palette: typeof flags.palette === "string" ? flags.palette : "studio-dark",
+    seconds: flags.seconds ? Number(flags.seconds) : 9,
+    fps: flags.fps ? Number(flags.fps) : 24,
+    maxLines: flags["max-lines"] ? Number(flags["max-lines"]) : 7,
+    source: typeof flags.source === "string" ? flags.source : null
+  });
+  console.log(JSON.stringify({ status: "created", generator: "term", ...res }, null, 2));
+}
+
 function printHelp() {
   console.log(`Loop Studio CLI (loop) — Grounded Dual-Theme README Motion & Loop Audit
 
 Usage:
   loop new <dir> [--template html|code-diff|shader] [--palette <id>] [--force]
+  loop diff <dir> [--range <a..b> | --staged | --file <patch.diff>] [--repo <root>] [--title <text>] [--max-lines <n>]
+  loop term <dir> --cmd "<command>" [--label "<text>"] [--output "<lines>"] [--input <file>] [--repo <root>] [--title <text>]
   loop sheet <dir> [--every <n>] [--cols <n>] [--engine auto|webkit|chromium] [--theme <t>]
   loop story <dir> [--engine auto|webkit|chromium] [--theme <t>]
   loop seam <dir|video> [--engine auto|webkit|chromium] [--lossy]
@@ -697,6 +741,12 @@ async function main() {
     switch (cmd) {
       case "new":
         cmdNew(target, flags);
+        break;
+      case "diff":
+        cmdDiff(target, flags);
+        break;
+      case "term":
+        cmdTerm(target, flags);
         break;
       case "sheet":
         await cmdSheet(target, flags);

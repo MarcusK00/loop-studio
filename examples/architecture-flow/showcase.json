@@ -1,0 +1,41 @@
+{
+  "title": "Architecture Flow Showcase",
+  "says": "Loop Studio steps HTML/GLSL in a real browser, verifies seam/WCAG/sources, and outputs dark/light bundles.",
+  "mode": "showcase",
+  "seconds": 10,
+  "fps": 24,
+  "width": 800,
+  "height": 400,
+  "palette": "studio-dark",
+  "stage": ["Source", "Browser", "Audit", "Bundle"],
+  "steps": [
+    {
+      "from": 8.75,
+      "to": 1.25,
+      "caption": "ingests HTML, diff, or GLSL",
+      "source": "tool/lib/generators.js:171",
+      "match": ["generateDiffProject"]
+    },
+    {
+      "from": 1.25,
+      "to": 3.75,
+      "caption": "steps phase in WebKit/Chrome",
+      "source": "tool/lib/renderer.js:8-15",
+      "match": ["chooseEngine", "webkit"]
+    },
+    {
+      "from": 3.75,
+      "to": 6.25,
+      "caption": "audits seam, WCAG & drift",
+      "source": "tool/lib/analyzers.js:373",
+      "match": ["analyzeSources"]
+    },
+    {
+      "from": 6.25,
+      "to": 8.75,
+      "caption": "exports dark & light WebP",
+      "source": "tool/lib/encoders.js:683",
+      "match": ["encodeAnimatedWebP"]
+    }
+  ]
+}

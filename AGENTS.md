@@ -7,6 +7,8 @@
 | Command | Purpose |
 | :--- | :--- |
 | `loop new <dir> [--template html\|code-diff\|shader]` | Scaffold a clean `scene.html` / `shader.frag` starter with `showcase.json` / `brief.json` |
+| `loop diff <dir> [--range <a..b> \| --staged \| --file <patch>]` | Generate a dual-theme PR code-diff animation directly from real `git diff` output |
+| `loop term <dir> --cmd "<command>" [--label "<text>"]` | Record real CLI command output into a dual-theme animated terminal showcase |
 | `loop sheet <dir>` | Render a numbered contact sheet (`sheet.png`) |
 | `loop story <dir>` | Render Frame `0` + step midpoints into `storyboard.png` for cold reading |
 | `loop seam <dir\|video>` | Measure wrap-seam RMS delta, duplicate frames, and flicker (works on projects or external videos via `ffmpeg`) |

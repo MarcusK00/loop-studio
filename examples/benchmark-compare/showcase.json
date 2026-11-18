@@ -1,0 +1,34 @@
+{
+  "title": "Benchmark Comparison Showcase",
+  "says": "Loop Studio cuts README animation size from ~9.7 MB raw GIFs to ~0.7 MB dark/light WebP with zero dependencies.",
+  "mode": "showcase",
+  "seconds": 9,
+  "fps": 24,
+  "width": 800,
+  "height": 400,
+  "palette": "studio-dark",
+  "stage": ["Baseline", "Compare", "Verified"],
+  "steps": [
+    {
+      "from": 7.5,
+      "to": 1.5,
+      "caption": "raw screen recordings bloat READMEs",
+      "source": "package.json:1-5",
+      "match": ["loop-studio", "2.0.0"]
+    },
+    {
+      "from": 1.5,
+      "to": 4.5,
+      "caption": "delta GIF and WebP cut payload 13x",
+      "source": "tool/lib/encoders.js:683",
+      "match": ["encodeAnimatedWebP"]
+    },
+    {
+      "from": 4.5,
+      "to": 7.5,
+      "caption": "ships 0.7 MB dark & light WebP",
+      "source": "tool/lib/analyzers.js:34-36",
+      "match": ["analyzeSeam"]
+    }
+  ]
+}
