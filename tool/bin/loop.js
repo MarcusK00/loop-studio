@@ -122,18 +122,18 @@ function cmdNew(targetDir, flags) {
     const showcaseData = {
       title: path.basename(absDir),
       says: "Loop Studio turns a one-line request into a checked, seamless loop.",
-      seconds: Number(flags.seconds || 10),
-      fps: Number(flags.fps || 30),
-      width: Number(flags.width || 800),
-      height: Number(flags.height || 360),
+      seconds: Number(flags.seconds || 8),
+      fps: Number(flags.fps || 60),
+      width: Number(flags.width || 640),
+      height: Number(flags.height || 288),
       palette,
       scene,
       stage: ["request", "sketch", "check", "loop.gif"],
       steps: [
-        { from: 8.75, to: 1.25, caption: "a request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
-        { from: 1.25, to: 3.75, caption: "sketch is drawn from the phase", source: "docs/contract.md:14" },
-        { from: 3.75, to: 6.25, caption: "seam and legibility are measured", source: "docs/tool.md:14" },
-        { from: 6.25, to: 8.75, caption: "the verified loop drops out", source: "docs/tool.md:24" }
+        { from: 7.0, to: 1.0, caption: "request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
+        { from: 1.0, to: 3.0, caption: "sketch draws from phase", source: "docs/contract.md:14" },
+        { from: 3.0, to: 5.0, caption: "seam and contrast measured", source: "docs/tool.md:14" },
+        { from: 5.0, to: 7.0, caption: "verified 60fps loop drops out", source: "docs/tool.md:24" }
       ]
     };
     const scPath = path.join(absDir, "showcase.json");
