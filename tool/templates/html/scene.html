@@ -29,6 +29,18 @@
       gap: 12px;
     }
 
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .phase-ring {
+      width: 16px;
+      height: 16px;
+      flex: none;
+    }
+
     .title {
       font-size: 13.5px;
       font-weight: 700;
@@ -135,7 +147,13 @@
 </head>
 <body>
   <div class="topbar">
-    <span class="title">Repository Pipeline</span>
+    <div class="brand">
+      <svg class="phase-ring" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7" fill="none" stroke="var(--loop-line)" stroke-width="2.2" />
+        <circle id="ring-dot" cx="10" cy="3" r="2.8" fill="var(--loop-accent)" />
+      </svg>
+      <span class="title">Repository Pipeline</span>
+    </div>
     <div class="stages">
       <span class="pill" id="st-0" data-loop-stage>Input</span>
       <span class="pill" id="st-1" data-loop-stage>Transform</span>
@@ -185,12 +203,19 @@
       });
 
       document.getElementById("caption-text").textContent = activeCaption;
+
+      const ang = phase * TAU - Math.PI / 2;
+      const ringDot = document.getElementById("ring-dot");
+      ringDot.setAttribute("cx", (10 + Math.cos(ang) * 7).toFixed(2));
+      ringDot.setAttribute("cy", (10 + Math.sin(ang) * 7).toFixed(2));
+
       for (let i = 0; i < 3; i++) {
         const on = i === activeIdx;
         document.getElementById("st-" + i).classList.toggle("active", on);
         document.getElementById("n-" + i).classList.toggle("active", on);
-        const wave = 50 + 45 * Math.sin(TAU * phase - i * 2.1);
-        document.getElementById("f-" + i).style.width = (on ? Math.max(72, wave) : wave * 0.55).toFixed(1) + "%";
+        const wave = 0.5 + 0.5 * Math.sin(TAU * phase - i * 2.1);
+        const pct = on ? 56 + 38 * wave : 22 + 34 * wave;
+        document.getElementById("f-" + i).style.width = pct.toFixed(1) + "%";
       }
     };
   </script>
