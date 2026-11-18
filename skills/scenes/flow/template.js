@@ -2,24 +2,24 @@
 export const meta = {
   mode: "showcase",
   scene: "flow",
-  seconds: 10,
-  fps: 20,
-  width: 800,
-  height: 360,
+  seconds: 8,
+  fps: 60,
+  width: 640,
+  height: 288,
   seed: 11,
   palette: "studio-dark"
 };
 
 export const showcase = {
   says: "Loop Studio turns a one-line request into a checked, seamless loop.",
-  seconds: 10,
+  seconds: 8,
   scene: "flow",
   stage: ["request", "sketch", "check", "loop.gif"],
   steps: [
-    { from: 8.75, to: 1.25, caption: "a request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
-    { from: 1.25, to: 3.75, caption: "sketch is drawn from the phase", source: "docs/contract.md:14" },
-    { from: 3.75, to: 6.25, caption: "seam and legibility are measured", source: "docs/tool.md:14" },
-    { from: 6.25, to: 8.75, caption: "the verified loop drops out", source: "docs/tool.md:24" }
+    { from: 7.0, to: 1.0, caption: "request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
+    { from: 1.0, to: 3.0, caption: "sketch draws from phase", source: "docs/contract.md:14" },
+    { from: 3.0, to: 5.0, caption: "seam and contrast measured", source: "docs/tool.md:14" },
+    { from: 5.0, to: 7.0, caption: "verified 60fps loop drops out", source: "docs/tool.md:24" }
   ]
 };
 
@@ -32,26 +32,26 @@ function placeItem(age, xs, W) {
   const right = 1.05 * W;
   let x = left;
   let alpha = 1;
-  if (age < 2.5) {
-    x = left + (xs[0] - left) * ease(age / 2.5);
-  } else if (age < 5.0) {
-    const u = (age - 2.5) / 2.5;
+  if (age < 2.0) {
+    x = left + (xs[0] - left) * ease(age / 2.0);
+  } else if (age < 4.0) {
+    const u = (age - 2.0) / 2.0;
     x = xs[0] + (xs[1] - xs[0]) * (0.18 * u + 0.82 * ease(u));
-  } else if (age < 7.5) {
-    const u = (age - 5.0) / 2.5;
+  } else if (age < 6.0) {
+    const u = (age - 4.0) / 2.0;
     x = xs[1] + (xs[2] - xs[1]) * (0.18 * u + 0.82 * ease(u));
-  } else if (age < 10.0) {
-    const u = (age - 7.5) / 2.5;
+  } else if (age < 8.0) {
+    const u = (age - 6.0) / 2.0;
     x = xs[2] + (xs[3] - xs[2]) * (0.18 * u + 0.82 * ease(u));
   } else {
-    const e = ease((age - 10.0) / 1.25);
+    const e = ease((age - 8.0) / 1.0);
     x = xs[3] + (right - xs[3]) * e;
     alpha = 1 - e;
   }
   return {
     x,
     alpha,
-    checked: ease((age - 6.6) / 0.8)
+    checked: ease((age - 5.2) / 0.65)
   };
 }
 
@@ -110,8 +110,8 @@ export function render(ctx, phase, kit) {
   const capY = Math.round(H * 0.87);
 
   const xs = [0, 1, 2, 3].map((i) => margin + i * (bw + gap) + bw / 2);
-  const items = [placeItem(t + 1.25, xs, W)];
-  if (t >= 8.75) items.push(placeItem(t - 8.75, xs, W));
+  const items = [placeItem(t + 1.0, xs, W)];
+  if (t >= 7.0) items.push(placeItem(t - 7.0, xs, W));
 
   // Transport rail + glowing carrier stream
   ctx.globalAlpha = 1;
@@ -134,7 +134,7 @@ export function render(ctx, phase, kit) {
     ctx.fill();
   }
 
-  const stepHeaders = ["01 BRIEF", "02 SKETCH", "03 SEAM", "04 EXPORT"];
+  const stepHeaders = ["01", "02", "03", "04"];
 
   xs.forEach((cx, i) => {
     let near = 0;
@@ -191,14 +191,14 @@ export function render(ctx, phase, kit) {
     ctx.lineTo(cardLeft + bw - 1, cardTop + headH);
     ctx.stroke();
 
-    // Card header step tag + primary stage label (kept for Frame-0 legibility check)
-    ctx.font = "600 10px monospace";
+    // Card header step badge + primary stage label
+    ctx.font = "700 10.5px monospace";
     ctx.fillStyle = activeColor;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText(stepHeaders[i], cardLeft + 10, cardTop + headH * 0.5);
 
-    ctx.font = "700 12px monospace";
+    ctx.font = "700 11.5px monospace";
     ctx.fillStyle = C.body;
     ctx.textAlign = "right";
     ctx.fillText(labels[i], cardLeft + bw - 10, cardTop + headH * 0.5);
@@ -208,8 +208,8 @@ export function render(ctx, phase, kit) {
 
     if (i === 0) {
       // Card 1: Prompt lines + live rotating Phase Ring (0 -> 1)
-      const ringX = cardLeft + bw * 0.28;
-      const ringR = Math.min(bw, bh) * 0.19;
+      const ringX = cardLeft + bw * 0.25;
+      const ringR = Math.min(bw, bh) * 0.155;
       ctx.strokeStyle = C.line;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -225,19 +225,19 @@ export function render(ctx, phase, kit) {
 
       ctx.fillStyle = C.spark;
       ctx.beginPath();
-      ctx.arc(ringX + Math.cos(pAng) * ringR, innerY + Math.sin(pAng) * ringR, 3.8, 0, TAU);
+      ctx.arc(ringX + Math.cos(pAng) * ringR, innerY + Math.sin(pAng) * ringR, 3.4, 0, TAU);
       ctx.fill();
 
-      // Prompt spec bars on right half of Card 1
-      const tx0 = cardLeft + bw * 0.52;
-      ctx.font = "500 10px monospace";
+      // Prompt spec labels on right half of Card 1
+      const tx0 = cardLeft + bw * 0.45;
+      ctx.font = "500 9.5px monospace";
       ctx.fillStyle = C.muted;
       ctx.textAlign = "left";
-      ctx.fillText("4s · 30fps", tx0, innerY - 14);
+      ctx.fillText("8s · 60fps", tx0, innerY - 14);
       ctx.fillStyle = C.body;
-      ctx.fillText("phase 0→1", tx0, innerY + 3);
+      ctx.fillText("phase 0→1", tx0, innerY + 2);
       ctx.fillStyle = cyan;
-      ctx.fillText("seed: 7", tx0, innerY + 19);
+      ctx.fillText("seed: 7", tx0, innerY + 18);
     } else if (i === 1) {
       // Card 2: Live Miniature Bioluminescent Particle-Orbit Sketch Viewport!
       const vpW = bw - 20;
@@ -372,7 +372,7 @@ export function render(ctx, phase, kit) {
   });
 
   // 4. Bottom Caption Pill + Step Progress Dots
-  const pillW = Math.round(W * 0.64);
+  const pillW = Math.round(W * 0.74);
   const pillH = 34;
   kit.roundRect(ctx, W / 2 - pillW / 2, capY - pillH / 2, pillW, pillH, 8);
   ctx.globalAlpha = 0.96;
@@ -394,11 +394,11 @@ export function render(ctx, phase, kit) {
     ctx.globalAlpha = 1;
     ctx.fillStyle = d === activeStepIdx ? cyan : C.line;
     ctx.beginPath();
-    ctx.arc(W / 2 - pillW / 2 + 18 + d * 11, capY, d === activeStepIdx ? 3.8 : 2.6, 0, TAU);
+    ctx.arc(W / 2 - pillW / 2 + 16 + d * 10, capY, d === activeStepIdx ? 3.5 : 2.5, 0, TAU);
     ctx.fill();
   }
 
-  ctx.font = "500 13px monospace";
+  ctx.font = "500 12px monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
@@ -409,7 +409,7 @@ export function render(ctx, phase, kit) {
     const fade = Math.max(0.25, Math.min(1, u / 0.35, (len - u) / 0.35));
     ctx.globalAlpha = fade;
     ctx.fillStyle = C.body;
-    ctx.fillText(c.caption, W / 2 + 16, capY);
+    ctx.fillText(c.caption, W / 2 + 22, capY);
   });
 
   ctx.globalAlpha = 1;

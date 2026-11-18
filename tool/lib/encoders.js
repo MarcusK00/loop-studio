@@ -424,13 +424,14 @@ export function encodeAnimatedWebP(frames, width, height, fps = 30, outPath) {
 
   if (caps.cwebpPath && caps.webpmuxPath) {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "loop-studio-webp-"));
+    const quality = frames.length > 200 ? "80" : "88";
     try {
       const muxArgs = [];
       for (let i = 0; i < frames.length; i++) {
         const pngPath = path.join(tmpDir, `f_${i}.png`);
         const webpPath = path.join(tmpDir, `f_${i}.webp`);
         fs.writeFileSync(pngPath, encodePNG(frames[i], width, height, 1));
-        const cw = spawnSync(caps.cwebpPath, ["-quiet", "-q", "88", pngPath, "-o", webpPath], { encoding: "utf8" });
+        const cw = spawnSync(caps.cwebpPath, ["-quiet", "-q", quality, pngPath, "-o", webpPath], { encoding: "utf8" });
         if (cw.status !== 0) {
           throw new Error(`cwebp failed on frame ${i}: ${cw.stderr}`);
         }

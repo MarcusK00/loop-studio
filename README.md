@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <img src="./gallery/loop-studio/showcase.gif" width="800" alt="Animated showcase diagram: Loop Studio turns a one-line request into a checked, seamless loop.">
+  <img src="./gallery/loop-studio/showcase.webp" width="800" alt="Animated showcase diagram: Loop Studio turns a one-line request into a checked, seamless 60 fps loop.">
 </p>
 
 <p align="center">
-  <em>Above: <code>gallery/loop-studio/showcase.gif</code> — a 10-second, 160-frame showcase loop rendered directly by the <code>loop</code> CLI (`seamScore: 1.032`, `duplicateFrames: 0`, `PASS`).</em>
+  <em>Above: <code>gallery/loop-studio/showcase.webp</code> — an 8-second, 480-frame <strong>60 fps</strong> showcase loop rendered directly by the <code>loop</code> CLI (`seamScore: 1.083`, `duplicateFrames: 0`, `PASS`).</em>
 </p>
 
 ---
@@ -26,7 +26,7 @@ Every animation below is pure deterministic code (`sketch.js`), measured by `loo
 
 | Preview | Subject, Scene Pack & Real Use Case | Seam & Audit | Artifacts |
 | :--- | :--- | :--- | :--- |
-| <img src="./gallery/loop-studio/showcase.gif" width="380" alt="Loop Studio Flow Showcase"> | **Loop Studio Pipeline** (`scenes/flow` · `studio-dark`)<br>**Use case**: README hero diagram explaining an end-to-end tool or compiler pipeline.<br><em>"Loop Studio turns a one-line request into a checked, seamless loop."</em> | `10s · 16fps`<br>`seamScore: 1.032` (`PASS`) | [showcase.json](./gallery/loop-studio/showcase.json) · [sketch.js](./gallery/loop-studio/sketch.js) · [storyboard.png](./gallery/loop-studio/storyboard.png) · [audit.json](./gallery/loop-studio/audit.json) |
+| <img src="./gallery/loop-studio/showcase.webp" width="380" alt="Loop Studio Flow Showcase"> | **Loop Studio Pipeline** (`scenes/flow` · `studio-dark`)<br>**Use case**: README hero diagram explaining an end-to-end tool or compiler pipeline.<br><em>"Loop Studio turns a one-line request into a checked, seamless loop."</em> | `8s · 60fps · 480f` (WebP)<br>`seamScore: 1.083` (`PASS`) | [showcase.webp](./gallery/loop-studio/showcase.webp) · [showcase.gif](./gallery/loop-studio/showcase.gif) · [sketch.js](./gallery/loop-studio/sketch.js) · [storyboard.png](./gallery/loop-studio/storyboard.png) |
 | <img src="./gallery/cli-audit-session/showcase.gif" width="380" alt="Loop CLI Terminal Showcase"> | **Loop CLI Audit Session** (`scenes/terminal` · `phosphor`)<br>**Use case**: CLI documentation showing real flags, terminal telemetry, and pass/fail checks.<br><em>"The loop CLI audits any sketch for seam jumps, caption legibility, and source citations."</em> | `10s · 16fps`<br>`seamScore: 0.989` (`PASS`) | [showcase.json](./gallery/cli-audit-session/showcase.json) · [sketch.js](./gallery/cli-audit-session/sketch.js) · [storyboard.png](./gallery/cli-audit-session/storyboard.png) · [audit.json](./gallery/cli-audit-session/audit.json) |
 | <img src="./gallery/api-pipeline-code/showcase.gif" width="380" alt="Phase Contract SDK Code Showcase"> | **Phase Contract SDK** (`scenes/code` · `studio-dark`)<br>**Use case**: Library & SDK docs pairing live-stepping code lines with a synchronized state monitor.<br><em>"Every Loop Studio sketch exports meta and a pure render(ctx, phase) function."</em> | `10s · 20fps`<br>`seamScore: 1.006` (`PASS`) | [showcase.json](./gallery/api-pipeline-code/showcase.json) · [sketch.js](./gallery/api-pipeline-code/sketch.js) · [storyboard.png](./gallery/api-pipeline-code/storyboard.png) · [audit.json](./gallery/api-pipeline-code/audit.json) |
 | <img src="./gallery/mcp-mesh-topology/showcase.gif" width="380" alt="Agent Orchestrator Architecture Showcase"> | **Agent Orchestrator Mesh** (`scenes/architecture` · `aurora`)<br>**Use case**: System architecture & multi-agent / MCP service topology diagrams for RFCs & READMEs.<br><em>"The Loop Studio orchestrator coordinates the CLI renderer, seam analyzer, and cold-read subagent."</em> | `10s · 20fps`<br>`seamScore: 0.985` (`PASS`) | [showcase.json](./gallery/mcp-mesh-topology/showcase.json) · [sketch.js](./gallery/mcp-mesh-topology/sketch.js) · [storyboard.png](./gallery/mcp-mesh-topology/storyboard.png) · [audit.json](./gallery/mcp-mesh-topology/audit.json) |

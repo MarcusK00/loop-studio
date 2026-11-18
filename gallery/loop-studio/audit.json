@@ -3,13 +3,14 @@
   "title": "Loop Studio Showcase (Flow Pipeline)",
   "mode": "showcase",
   "useCase": "README hero diagram explaining what a repo or workflow does end-to-end",
-  "fps": 16,
+  "fps": 60,
   "pass": true,
-  "seamScore": 1.032,
+  "seamScore": 1.117,
   "duplicateFrames": 0,
-  "flickerScore": 0.745,
+  "flickerScore": 0.525,
   "legiblePass": true,
   "sourcesPass": true,
-  "gifKB": 3924.5,
-  "totalFrames": 160
+  "gifKB": 9476.8,
+  "webpKB": 5622.2,
+  "totalFrames": 480
 }

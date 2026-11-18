@@ -23,22 +23,22 @@ const GALLERY_ITEMS = [
     scene: "flow",
     palette: "studio-dark",
     useCase: "README hero diagram explaining what a repo or workflow does end-to-end",
-    prompt: "Make me a 10 second video that loops smoothly about this repo and what it does.",
+    prompt: "Make me an 8 second 60fps video that loops smoothly about this repo and what it does.",
     showcase: {
       title: "Loop Studio Showcase",
       says: "Loop Studio turns a one-line request into a checked, seamless loop.",
-      seconds: 10,
-      fps: 16,
-      width: 800,
-      height: 360,
+      seconds: 8,
+      fps: 60,
+      width: 640,
+      height: 288,
       palette: "studio-dark",
       scene: "flow",
       stage: ["request", "sketch", "check", "loop.gif"],
       steps: [
-        { from: 8.75, to: 1.25, caption: "a request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
-        { from: 1.25, to: 3.75, caption: "sketch is drawn from the phase", source: "docs/contract.md:14" },
-        { from: 3.75, to: 6.25, caption: "seam and legibility are measured", source: "docs/tool.md:14" },
-        { from: 6.25, to: 8.75, caption: "the verified loop drops out", source: "docs/tool.md:24" }
+        { from: 7.0, to: 1.0, caption: "request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
+        { from: 1.0, to: 3.0, caption: "sketch draws from phase", source: "docs/contract.md:14" },
+        { from: 3.0, to: 5.0, caption: "seam and contrast measured", source: "docs/tool.md:14" },
+        { from: 5.0, to: 7.0, caption: "verified 60fps loop drops out", source: "docs/tool.md:24" }
       ]
     }
   },
