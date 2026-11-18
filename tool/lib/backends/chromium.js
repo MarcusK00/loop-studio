@@ -276,10 +276,10 @@ function launchChromium(chromePath, width, height, userDataDir) {
     const timer = setTimeout(() => {
       if (!settled) {
         settled = true;
-        child.kill("SIGKILL");
+        try { child.kill("SIGKILL"); } catch {}
         reject(new Error(`Timed out starting Chromium: ${stderrBuf}`));
       }
-    }, 10000);
+    }, 30000);
 
     child.stderr.on("data", async (chunk) => {
       stderrBuf += chunk.toString("utf8");
@@ -388,11 +388,29 @@ export async function renderWithChromium({ absDir, harnessHtml, width, height, p
       telemetryByIndex
     };
   } finally {
-    if (cdp) cdp.close();
+    if (cdp) {
+      try { await Promise.race([cdp.send("Browser.close"), new Promise((r) => setTimeout(r, 400))]); } catch {}
+      cdp.close();
+    }
     if (child) {
-      try { child.kill("SIGKILL"); } catch {}
+      const waitExit = new Promise((resolve) => {
+        if (child.exitCode !== null || child.signalCode !== null) return resolve();
+        const t = setTimeout(resolve, 1500);
+        child.once("exit", () => {
+          clearTimeout(t);
+          resolve();
+        });
+      });
+      try {
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      } catch {}
+      await waitExit;
     }
     server.close();
-    fs.rmSync(tmpUserDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tmpUserDir, { recursive: true, force: true, maxRetries: 6, retryDelay: 50 });
+    } catch {
+      // Ignore transient Chromium helper lock files during temp profile cleanup
+    }
   }
 }

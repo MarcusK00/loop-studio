@@ -14,7 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Install FFmpeg for external video audit tests
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Check Loop CLI Doctor
         run: node ./tool/bin/loop.js doctor
-      - name: Run Core & Browser Eval Suite
+      - name: Run Core, Chromium & External Video Eval Suite
         run: npm test
