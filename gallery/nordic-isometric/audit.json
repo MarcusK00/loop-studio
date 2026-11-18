@@ -2,6 +2,8 @@
   "id": "nordic-isometric",
   "title": "Harmonic Architecture (Isometric Grid)",
   "mode": "ambient",
+  "useCase": "Infrastructure, cloud platform, and modular architecture hero tiles",
+  "fps": 20,
   "pass": true,
   "seamScore": 0.927,
   "duplicateFrames": 0,

@@ -2,6 +2,8 @@
   "id": "loop-studio",
   "title": "Loop Studio Showcase (Flow Pipeline)",
   "mode": "showcase",
+  "useCase": "README hero diagram explaining what a repo or workflow does end-to-end",
+  "fps": 16,
   "pass": true,
   "seamScore": 1.032,
   "duplicateFrames": 0,

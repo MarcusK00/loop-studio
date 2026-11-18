@@ -1,11 +1,11 @@
 // Loop Studio — Gallery Builder
-// Builds and renders all 6 official gallery fixtures (2 showcase loops + 4 ambient loops)
-// along with their contact sheets, storyboards, audit reports, posters, and animated GIFs.
+// Builds and renders all 12 official gallery fixtures (4 showcase loops + 8 ambient loops)
+// along with their contact sheets, storyboards, audit reports, posters, GIFs, and high-FPS WebPs.
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { encodePNG, encodeGIF } from "../lib/encoders.js";
+import { encodePNG, encodeGIF, encodeAnimatedWebP, detectCapabilities } from "../lib/encoders.js";
 import { analyzeSeam, analyzeLegibility, analyzeSources } from "../lib/analyzers.js";
 import { renderAllFrames, renderContactSheet, renderStoryboard } from "../lib/compositor.js";
 import { generatePreviewHtml } from "../lib/server.js";
@@ -15,12 +15,14 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, "../..");
 
 const GALLERY_ITEMS = [
+  // === Showcase Loops ===
   {
     id: "loop-studio",
     title: "Loop Studio Showcase (Flow Pipeline)",
     mode: "showcase",
     scene: "flow",
     palette: "studio-dark",
+    useCase: "README hero diagram explaining what a repo or workflow does end-to-end",
     prompt: "Make me a 10 second video that loops smoothly about this repo and what it does.",
     showcase: {
       title: "Loop Studio Showcase",
@@ -46,6 +48,7 @@ const GALLERY_ITEMS = [
     mode: "showcase",
     scene: "terminal",
     palette: "phosphor",
+    useCase: "CLI documentation showing commands, flags, and pass/fail audit output",
     prompt: "Animate how the loop CLI audits a sketch for seam continuity and WCAG legibility.",
     showcase: {
       title: "Loop CLI Audit Session",
@@ -66,11 +69,71 @@ const GALLERY_ITEMS = [
     }
   },
   {
+    id: "api-pipeline-code",
+    title: "Phase Contract SDK Showcase (Code)",
+    mode: "showcase",
+    scene: "code",
+    palette: "studio-dark",
+    useCase: "SDK / library docs pairing live-stepping code with a synchronized state monitor",
+    prompt: "Show how the render(ctx, phase) SDK contract executes line-by-line.",
+    showcase: {
+      title: "Phase Contract SDK Showcase",
+      says: "Every Loop Studio sketch exports meta and a pure render(ctx, phase) function.",
+      seconds: 10,
+      fps: 20,
+      width: 800,
+      height: 320,
+      palette: "studio-dark",
+      scene: "code",
+      stage: [
+        "export const meta = { seconds: 4 };",
+        "export function render(ctx, phase) {",
+        "  const a = phase * Math.PI * 2;",
+        "  drawOrbit(ctx, a); // seam 1.00"
+      ],
+      steps: [
+        { from: 8.75, to: 1.25, caption: "declare duration and fps in meta", source: "rules/AGENTS.md:8" },
+        { from: 1.25, to: 3.75, caption: "pass normalized phase to render()", source: "rules/AGENTS.md:17" },
+        { from: 3.75, to: 6.25, caption: "convert phase to integer cycles", source: "skills/loop-math/SKILL.md:22" },
+        { from: 6.25, to: 8.75, caption: "last frame meets frame 0 cleanly", source: "skills/loop-render/SKILL.md:30" }
+      ]
+    }
+  },
+  {
+    id: "mcp-mesh-topology",
+    title: "Agent Orchestrator Mesh (Architecture)",
+    mode: "showcase",
+    scene: "architecture",
+    palette: "aurora",
+    useCase: "System architecture & multi-agent/MCP topology diagrams for engineering RFCs",
+    prompt: "Animate how the Loop Studio agent coordinates the CLI, seam auditor, and cold-reader subagent.",
+    showcase: {
+      title: "Agent Orchestrator Mesh",
+      says: "The Loop Studio orchestrator coordinates the CLI renderer, seam analyzer, and cold-read subagent.",
+      seconds: 10,
+      fps: 20,
+      width: 800,
+      height: 320,
+      palette: "aurora",
+      scene: "architecture",
+      stage: ["Agent", "loop CLI", "Seam Audit", "Cold Reader"],
+      steps: [
+        { from: 8.75, to: 1.25, caption: "agent scaffolds sketch via loop CLI", source: "AGENTS.md:9" },
+        { from: 1.25, to: 3.75, caption: "CLI renders storyboard & frame deltas", source: "skills/loop-render/SKILL.md:24" },
+        { from: 3.75, to: 6.25, caption: "cold-reader inspects storyboard.png", source: "agents/loop-cold-reader.md:10" },
+        { from: 6.25, to: 8.75, caption: "verified loop.gif & audit return", source: "skills/loop-audit/SKILL.md:9" }
+      ]
+    }
+  },
+
+  // === Ambient Loops ===
+  {
     id: "deep-sea-orbits",
     title: "Abyssal Bioluminescence (Particle Orbit)",
     mode: "ambient",
     style: "particle-orbit",
     palette: "abyss",
+    useCase: "Calm ambient background for dark-mode apps, streams, and loading states",
     prompt: "Make a 4-second square loop. Deep sea, slow, bioluminescent.",
     brief: {
       title: "Abyssal Bioluminescence",
@@ -91,6 +154,7 @@ const GALLERY_ITEMS = [
     mode: "ambient",
     style: "flow-field",
     palette: "aurora",
+    useCase: "Organic generative header for landing pages, music visualizers, and project banners",
     prompt: "Drifting aurora currents, organic silk streamlines, 4-second loop.",
     brief: {
       title: "Arctic Currents",
@@ -111,6 +175,7 @@ const GALLERY_ITEMS = [
     mode: "ambient",
     style: "isometric-grid",
     palette: "nordic",
+    useCase: "Infrastructure, cloud platform, and modular architecture hero tiles",
     prompt: "Clean architectural blocks on an isometric grid rising and falling in waves.",
     brief: {
       title: "Harmonic Architecture",
@@ -131,6 +196,7 @@ const GALLERY_ITEMS = [
     mode: "ambient",
     style: "blueprint-cad",
     palette: "blueprint",
+    useCase: "Robotics, hardware, CAD, and precision engineering repo badges",
     prompt: "Precision engineering blueprint with planetary gear linkages rotating at 1x and -2x harmonic speeds.",
     brief: {
       title: "Epicyclic Telemetry",
@@ -144,10 +210,94 @@ const GALLERY_ITEMS = [
       height: 320,
       seed: 79
     }
+  },
+  {
+    id: "readme-hero-3d",
+    title: "Nebula SDF Sculpture (3D Raymarch)",
+    mode: "ambient",
+    style: "sdf-raymarch",
+    palette: "nebula",
+    useCase: "Zero-dependency 3D product showcase & smooth shader sculpture for SaaS hero cards",
+    prompt: "30 fps 3D raymarched smooth-union torus and orbiting spheres in neon nebula lighting.",
+    brief: {
+      title: "Nebula SDF Sculpture",
+      prompt: "30 fps 3D raymarched smooth-union torus and orbiting spheres in neon nebula lighting.",
+      mode: "ambient",
+      style: "sdf-raymarch",
+      palette: "nebula",
+      seconds: 3,
+      fps: 30,
+      width: 280,
+      height: 280,
+      seed: 53
+    }
+  },
+  {
+    id: "retro-crt-loader",
+    title: "Amber CRT Radar (Bayer Dither)",
+    mode: "ambient",
+    style: "dither-mono",
+    palette: "amber-crt",
+    useCase: "Low-bandwidth terminal/game splash screen & zero-shimmer retro loading indicator",
+    prompt: "30 fps retro amber CRT sphere and radar sweep using ordered 4x4 Bayer dithering.",
+    brief: {
+      title: "Amber CRT Radar",
+      prompt: "30 fps retro amber CRT sphere and radar sweep using ordered 4x4 Bayer dithering.",
+      mode: "ambient",
+      style: "dither-mono",
+      palette: "amber-crt",
+      seconds: 3,
+      fps: 30,
+      width: 280,
+      height: 280,
+      seed: 67
+    }
+  },
+  {
+    id: "kinetic-release-banner",
+    title: "Editorial Kinetic Wave (60 fps Type)",
+    mode: "ambient",
+    style: "kinetic-type",
+    palette: "editorial",
+    useCase: "60 fps social announcement card, talk title slide, and release launch banner",
+    prompt: "Silky 60 fps editorial kinetic typography wave repeating PHASE 0→1.",
+    brief: {
+      title: "Editorial Kinetic Wave",
+      prompt: "Silky 60 fps editorial kinetic typography wave repeating PHASE 0→1.",
+      mode: "ambient",
+      style: "kinetic-type",
+      palette: "editorial",
+      seconds: 2,
+      fps: 60,
+      width: 280,
+      height: 280,
+      seed: 61
+    }
+  },
+  {
+    id: "sonar-bathymetry",
+    title: "Abyssal Bathymetry (Topographic Isolines)",
+    mode: "ambient",
+    style: "topographic-contour",
+    palette: "abyss",
+    useCase: "Geospatial, weather, sonar, and telemetry elevation background loops",
+    prompt: "30 fps animated bathymetric contour isolines over a cyclic scalar noise field.",
+    brief: {
+      title: "Abyssal Bathymetry",
+      prompt: "30 fps animated bathymetric contour isolines over a cyclic scalar noise field.",
+      mode: "ambient",
+      style: "topographic-contour",
+      palette: "abyss",
+      seconds: 3,
+      fps: 30,
+      width: 280,
+      height: 280,
+      seed: 83
+    }
   }
 ];
 
-async function buildItem(item) {
+async function buildItem(item, caps) {
   const dir = path.join(REPO_ROOT, "gallery", item.id);
   fs.mkdirSync(dir, { recursive: true });
 
@@ -159,6 +309,7 @@ async function buildItem(item) {
   let sketchCode = fs.readFileSync(templatePath, "utf8");
   const spec = item.mode === "showcase" ? item.showcase : item.brief;
   sketchCode = sketchCode
+    .replace(/seconds:\s*\d+/, `seconds: ${spec.seconds}`)
     .replace(/fps:\s*\d+/, `fps: ${spec.fps}`)
     .replace(/width:\s*\d+/, `width: ${spec.width}`)
     .replace(/height:\s*\d+/, `height: ${spec.height}`)
@@ -188,13 +339,23 @@ async function buildItem(item) {
   fs.writeFileSync(path.join(dir, "poster.png"), posterBuf);
 
   const gifBuf = encodeGIF(frames, width, height, fps);
-  const gifName = item.mode === "showcase" ? "showcase.gif" : "loop.gif";
-  fs.writeFileSync(path.join(dir, gifName), gifBuf);
+  const stem = item.mode === "showcase" ? "showcase" : "loop";
+  fs.writeFileSync(path.join(dir, `${stem}.gif`), gifBuf);
   if (item.mode === "showcase") {
     fs.writeFileSync(path.join(dir, "loop.gif"), gifBuf);
   }
 
-  // 3. Contact sheet or storyboard
+  // 3. High-FPS Animated WebP when cwebp+webpmux are available (skipped gracefully on minimal CI)
+  let webpKB = null;
+  const webpPath = path.join(dir, `${stem}.webp`);
+  if (caps.cwebpPath && caps.webpmuxPath && fps >= 25) {
+    const wRes = encodeAnimatedWebP(frames, width, height, fps, webpPath);
+    webpKB = Number((wRes.bytes / 1024).toFixed(1));
+  } else if (fs.existsSync(webpPath)) {
+    webpKB = Number((fs.statSync(webpPath).size / 1024).toFixed(1));
+  }
+
+  // 4. Contact sheet or storyboard
   const sheetCanvas = renderContactSheet(sketchModule, { ...meta, showcase: item.showcase, cols: 4 });
   fs.writeFileSync(path.join(dir, "sheet.png"), encodePNG(sheetCanvas.data, sheetCanvas.width, sheetCanvas.height));
 
@@ -203,7 +364,7 @@ async function buildItem(item) {
     fs.writeFileSync(path.join(dir, "storyboard.png"), encodePNG(boardCanvas.data, boardCanvas.width, boardCanvas.height));
   }
 
-  // 4. Seam, Legibility, Sources, Audit
+  // 5. Seam, Legibility, Sources, Audit
   const seam = analyzeSeam(frames, width, height);
   fs.writeFileSync(path.join(dir, "seam.json"), JSON.stringify(seam, null, 2) + "\n", "utf8");
 
@@ -217,6 +378,8 @@ async function buildItem(item) {
     id: item.id,
     title: item.title,
     mode: item.mode,
+    useCase: item.useCase,
+    fps,
     pass: seam.pass && legible.pass && sources.pass,
     seamScore: seam.seamScore,
     duplicateFrames: seam.duplicateFrames,
@@ -224,6 +387,7 @@ async function buildItem(item) {
     legiblePass: legible.pass,
     sourcesPass: sources.pass,
     gifKB: Number((gifBuf.length / 1024).toFixed(1)),
+    ...(webpKB !== null ? { webpKB } : {}),
     totalFrames
   };
   fs.writeFileSync(path.join(dir, "audit.json"), JSON.stringify(audit, null, 2) + "\n", "utf8");
@@ -231,11 +395,14 @@ async function buildItem(item) {
 }
 
 async function main() {
+  const caps = detectCapabilities();
   const results = [];
   for (const item of GALLERY_ITEMS) {
-    const res = await buildItem(item);
+    const res = await buildItem(item, caps);
     results.push(res);
-    console.log(`[Gallery] ${res.id}: pass=${res.pass} seam=${res.seamScore} dup=${res.duplicateFrames} gif=${res.gifKB}KB`);
+    console.log(
+      `[Gallery] ${res.id} (${res.fps}fps): pass=${res.pass} seam=${res.seamScore} dup=${res.duplicateFrames} gif=${res.gifKB}KB${res.webpKB ? ` webp=${res.webpKB}KB` : ""}`
+    );
   }
   fs.writeFileSync(
     path.join(REPO_ROOT, "gallery", "manifest.json"),
