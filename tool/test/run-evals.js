@@ -14,6 +14,7 @@ import {
 import { BitmapBuffer } from "../lib/bitmap.js";
 import { buildHarnessDocument } from "../lib/harness.js";
 import { detectCapabilities, encodePNG, decodePNG, encodeGIF } from "../lib/encoders.js";
+import { parseUnifiedDiff, highlightCodeLine } from "../lib/generators.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -209,6 +210,27 @@ function testCoreAnalyzersAndGates() {
     darkHarness.html.includes("--loop-on-accent: #090C16") && lightHarness.html.includes("--loop-on-accent: #FFFFFF"),
     "Harness auto-computes WCAG-safe --loop-on-accent for dark (#090C16) and light (#FFFFFF) themes"
   );
+
+  // 1h. Unified diff parser & code highlighter
+  const samplePatch = [
+    "diff --git a/tool/lib/renderer.js b/tool/lib/renderer.js",
+    "--- a/tool/lib/renderer.js",
+    "+++ b/tool/lib/renderer.js",
+    "@@ -8,2 +8,3 @@ export function chooseEngine({ engine = \"auto\" } = {}) {",
+    "-  const caps = {};",
+    "+  const caps = detectCapabilities();",
+    "+  return caps.browserEngine;"
+  ].join("\n");
+  const parsedDiff = parseUnifiedDiff(samplePatch, 6);
+  const hl = highlightCodeLine("const x = detectCapabilities(); // check");
+  assert(
+    parsedDiff && parsedDiff.file === "tool/lib/renderer.js" && parsedDiff.delCount === 1 && parsedDiff.addCount === 2 && parsedDiff.startLine === 8,
+    "parseUnifiedDiff extracts file path, line range, and +/- hunk counts"
+  );
+  assert(
+    hl.includes('<span class="kw">const</span>') && hl.includes('<span class="fn">detectCapabilities</span>') && hl.includes('<span class="cm">// check</span>'),
+    "highlightCodeLine tokenizes keywords, function calls, and comments"
+  );
 }
 
 function testBrowserEndToEnd() {
@@ -236,7 +258,7 @@ function testBrowserEndToEnd() {
     assert(tmpAudit.status === 0, "Scaffolded html template passes dual-theme `loop audit --themes dark,light`", tmpAudit.stderr || tmpAudit.stdout);
 
     // Copy examples to tmpRoot so repo working tree stays spotless during tests
-    for (const exName of ["code-diff", "ui-showcase", "shader-hero"]) {
+    for (const exName of ["code-diff", "ui-showcase", "cli-terminal", "architecture-flow", "benchmark-compare", "shader-hero"]) {
       const dst = path.join(tmpRoot, exName);
       fs.cpSync(path.join(REPO_ROOT, "examples", exName), dst, { recursive: true });
     }
@@ -246,6 +268,39 @@ function testBrowserEndToEnd() {
 
     const uiAudit = runCli(["audit", path.join(tmpRoot, "ui-showcase"), "--repo", REPO_ROOT, "--themes", "dark,light"]);
     assert(uiAudit.status === 0, "examples/ui-showcase passes dual-theme (dark+light) seam, contrast & doc-drift audit", uiAudit.stderr || uiAudit.stdout);
+
+    for (const exName of ["cli-terminal", "architecture-flow", "benchmark-compare"]) {
+      const res = runCli(["audit", path.join(tmpRoot, exName), "--repo", REPO_ROOT, "--themes", "dark,light"]);
+      assert(res.status === 0, `examples/${exName} passes dual-theme (dark+light) seam, contrast & doc-drift audit`, res.stderr || res.stdout);
+    }
+
+    // Test `loop diff` generator end-to-end from a real patch file
+    const patchPath = path.join(tmpRoot, "sample.diff");
+    fs.writeFileSync(
+      patchPath,
+      [
+        "diff --git a/tool/lib/renderer.js b/tool/lib/renderer.js",
+        "--- a/tool/lib/renderer.js",
+        "+++ b/tool/lib/renderer.js",
+        "@@ -8,2 +8,3 @@",
+        "-export function chooseEngine() {",
+        "+export function chooseEngine({ engine = \"auto\" } = {}) {",
+        "+  const caps = detectCapabilities();"
+      ].join("\n"),
+      "utf8"
+    );
+    const genDiffDir = path.join(tmpRoot, "gen-diff");
+    const genDiffRes = runCli(["diff", genDiffDir, "--file", patchPath, "--repo", REPO_ROOT, "--fps", "20"]);
+    assert(genDiffRes.status === 0 && fs.existsSync(path.join(genDiffDir, "scene.html")), "`loop diff --file` generates dual-theme diff scene");
+    const genDiffAudit = runCli(["audit", genDiffDir, "--repo", REPO_ROOT, "--themes", "dark,light"]);
+    assert(genDiffAudit.status === 0, "`loop diff` generated scene passes dual-theme `loop audit`", genDiffAudit.stderr || genDiffAudit.stdout);
+
+    // Test `loop term` generator end-to-end from a real CLI command
+    const genTermDir = path.join(tmpRoot, "gen-term");
+    const genTermRes = runCli(["term", genTermDir, "--cmd", "node ./tool/bin/loop.js doctor", "--label", "loop doctor", "--repo", REPO_ROOT, "--fps", "20"]);
+    assert(genTermRes.status === 0 && fs.existsSync(path.join(genTermDir, "scene.html")), "`loop term --cmd` captures CLI output into scene.html");
+    const genTermAudit = runCli(["audit", genTermDir, "--repo", REPO_ROOT, "--themes", "dark,light"]);
+    assert(genTermAudit.status === 0, "`loop term` generated scene passes dual-theme `loop audit`", genTermAudit.stderr || genTermAudit.stdout);
 
     const storyRes = runCli(["story", path.join(tmpRoot, "code-diff")]);
     assert(

@@ -1,0 +1,44 @@
+{
+  "title": "Loop CLI Audit",
+  "says": "Runs `loop audit ./examples/code-diff --themes dark,light` and streams verified CLI output in dark and light themes.",
+  "mode": "showcase",
+  "seconds": 9,
+  "fps": 24,
+  "width": 800,
+  "height": 378,
+  "palette": "studio-dark",
+  "stage": [
+    "Command",
+    "Output",
+    "Status"
+  ],
+  "steps": [
+    {
+      "from": 7.5,
+      "to": 1.5,
+      "caption": "run CLI command",
+      "source": "tool/lib/generators.js:463",
+      "match": [
+        "generateTerminalProject"
+      ]
+    },
+    {
+      "from": 1.5,
+      "to": 4.5,
+      "caption": "stream deterministic output",
+      "source": "tool/lib/generators.js:463",
+      "match": [
+        "generateTerminalProject"
+      ]
+    },
+    {
+      "from": 4.5,
+      "to": 7.5,
+      "caption": "exits 0 · all checks pass",
+      "source": "tool/lib/generators.js:463",
+      "match": [
+        "generateTerminalProject"
+      ]
+    }
+  ]
+}

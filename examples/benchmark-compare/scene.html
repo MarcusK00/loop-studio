@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; width: 100vw; height: 100vh;
+      background:
+        radial-gradient(560px 280px at 74% 20%, color-mix(in srgb, var(--loop-spark) 14%, transparent), transparent 72%),
+        radial-gradient(480px 260px at 20% 84%, color-mix(in srgb, var(--loop-accent) 10%, transparent), transparent 72%),
+        var(--loop-ground);
+      color: var(--loop-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      padding: 20px 28px; overflow: hidden;
+    }
+    .topbar { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 700; }
+    .phase-ring { width: 16px; height: 16px; flex: none; }
+    .stages { display: flex; gap: 8px; }
+    .pill {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; font-weight: 600;
+      padding: 4px 11px; border-radius: 999px; border: 1px solid var(--loop-line);
+      background: var(--loop-surface); color: var(--loop-body); opacity: 0.72;
+    }
+    .pill.active { opacity: 1; border-color: var(--loop-accent); background: var(--loop-accent); color: var(--loop-on-accent); }
+    .panel {
+      width: 100%; flex: 1; margin: 12px 0; padding: 20px 24px;
+      background: var(--loop-surface); border: 1px solid var(--loop-line); border-radius: 14px;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.22);
+      display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+    }
+    .panel-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .panel-title { font-size: 14px; font-weight: 700; }
+    .panel-sub { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11.5px; color: var(--loop-muted); }
+    .rows { display: flex; flex-direction: column; gap: 14px; flex: 1; justify-content: center; }
+    .row { display: flex; flex-direction: column; gap: 6px; }
+    .row-top { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 600; }
+    .row-meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: var(--loop-muted); }
+    .row.winner .row-meta { color: var(--loop-spark); font-weight: 700; }
+    .track {
+      height: 22px; width: 100%; border-radius: 7px;
+      background: var(--loop-ground); border: 1px solid var(--loop-line); overflow: hidden; position: relative;
+    }
+    .bar {
+      height: 100%; min-width: 64px; white-space: nowrap; border-radius: 6px; display: flex; align-items: center; justify-content: flex-end;
+      padding: 0 10px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; font-weight: 700;
+    }
+    .bar.b0 { background: color-mix(in srgb, var(--loop-muted) 42%, var(--loop-line)); color: var(--loop-body); }
+    .bar.b1 { background: var(--loop-accent); color: var(--loop-on-accent); }
+    .bar.b2 { background: linear-gradient(90deg, var(--loop-spark), var(--loop-accent)); color: var(--loop-on-spark); }
+    .badge-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .chip {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: 6px; border: 1px solid var(--loop-line);
+      background: var(--loop-ground); color: var(--loop-body);
+    }
+    .chip.hi { border-color: var(--loop-spark); color: var(--loop-spark); }
+    .caption-pill {
+      display: flex; align-items: center; gap: 10px; background: var(--loop-surface);
+      border: 1px solid var(--loop-line); border-radius: 10px; padding: 7px 18px;
+    }
+    .caption-text { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13.5px; font-weight: 600; color: var(--loop-body); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <svg class="phase-ring" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7" fill="none" stroke="var(--loop-line)" stroke-width="2.2" />
+        <circle id="ring-dot" cx="10" cy="3" r="2.8" fill="var(--loop-accent)" />
+      </svg>
+      <span>README Asset Payload &amp; Overhead</span>
+    </div>
+    <div class="stages">
+      <span class="pill" id="st-0" data-loop-stage>Baseline</span>
+      <span class="pill" id="st-1" data-loop-stage>Compare</span>
+      <span class="pill" id="st-2" data-loop-stage>Verified</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">10s 800×420 README Showcase Size (Lower is Better)</span>
+      <span class="panel-sub" id="ratio-sub">13.8× smaller than raw GIF</span>
+    </div>
+
+    <div class="rows">
+      <div class="row">
+        <div class="row-top"><span>Raw Screen Recording GIF</span><span class="row-meta" id="v0">9.70 MB · wall-clock jitter</span></div>
+        <div class="track"><div class="bar b0" id="bar0" style="width:94%">9.7 MB</div></div>
+      </div>
+      <div class="row">
+        <div class="row-top"><span>Delta GIF89a (Loop Studio)</span><span class="row-meta" id="v1">1.57 MB · zero deps</span></div>
+        <div class="track"><div class="bar b1" id="bar1" style="width:26%">1.6 MB</div></div>
+      </div>
+      <div class="row winner">
+        <div class="row-top"><span>Animated WebP (Loop Studio · dark/light)</span><span class="row-meta" id="v2">0.70 MB · WCAG 4.5:1 PASS</span></div>
+        <div class="track"><div class="bar b2" id="bar2" style="width:14%">0.7 MB</div></div>
+      </div>
+    </div>
+
+    <div class="badge-row">
+      <span class="chip hi" id="c0">0 npm dependencies</span>
+      <span class="chip" id="c1">seamScore: 1.04 PASS</span>
+      <span class="chip" id="c2">dark + light &lt;picture&gt;</span>
+    </div>
+  </div>
+
+  <div class="caption-pill">
+    <span class="caption-text" id="caption-text" data-loop-caption>raw screen recordings bloat READMEs</span>
+  </div>
+
+  <script>
+    function smoothstep(x) {
+      const c = Math.max(0, Math.min(1, x));
+      return c * c * (3 - 2 * c);
+    }
+
+    window.renderLoop = function(phase, kit, meta) {
+      const S = window.__LOOP_SHOWCASE__ || {};
+      const seconds = S.seconds || (meta && meta.seconds) || 9;
+      const steps = Array.isArray(S.steps) ? S.steps : [];
+      const t = phase * seconds;
+      const TAU = Math.PI * 2;
+
+      let activeIdx = 0;
+      let activeCaption = steps[0] ? steps[0].caption : "";
+      steps.forEach((st, idx) => {
+        const len = ((st.to - st.from) % seconds + seconds) % seconds || seconds;
+        const u = ((t - st.from) % seconds + seconds) % seconds;
+        if (u < len) {
+          activeIdx = idx;
+          activeCaption = st.caption;
+        }
+      });
+
+      document.getElementById("caption-text").textContent = activeCaption;
+      for (let i = 0; i < 3; i++) {
+        document.getElementById("st-" + i).classList.toggle("active", i === activeIdx);
+      }
+
+      const ang = phase * TAU - Math.PI / 2;
+      const dot = document.getElementById("ring-dot");
+      dot.setAttribute("cx", (10 + Math.cos(ang) * 7).toFixed(2));
+      dot.setAttribute("cy", (10 + Math.sin(ang) * 7).toFixed(2));
+
+      // Seamless symmetric rise -> hold -> retract curve across [0, 1)
+      const rise = smoothstep(phase / 0.28);
+      const retract = phase > 0.84 ? 1 - smoothstep((phase - 0.84) / 0.16) : 1;
+      const breathe = 0.96 + 0.04 * Math.sin(TAU * phase * 2);
+      const k = (0.32 + 0.68 * rise * retract) * breathe;
+
+      const w0 = 94 * k;
+      const w1 = 28 * k;
+      const w2 = 15 * k;
+      document.getElementById("bar0").style.width = w0.toFixed(1) + "%";
+      document.getElementById("bar1").style.width = w1.toFixed(1) + "%";
+      document.getElementById("bar2").style.width = w2.toFixed(1) + "%";
+
+      document.getElementById("bar0").textContent = (9.7 * k).toFixed(1) + " MB";
+      document.getElementById("bar1").textContent = (1.6 * k).toFixed(1) + " MB";
+      document.getElementById("bar2").textContent = (0.7 * k).toFixed(1) + " MB";
+
+      document.getElementById("c0").classList.toggle("hi", activeIdx === 0);
+      document.getElementById("c1").classList.toggle("hi", activeIdx === 1);
+      document.getElementById("c2").classList.toggle("hi", activeIdx === 2);
+    };
+  </script>
+</body>
+</html>

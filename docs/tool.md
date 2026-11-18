@@ -6,7 +6,11 @@ The `loop` CLI (`tool/bin/loop.js`) scaffolds HTML/GLSL loop scenes, drives dete
 
 1. `loop new <dir> [--template html|code-diff|shader] [--palette <id>] [--force]`
    Scaffolds a starter `scene.html` or `shader.frag`, `showcase.json` or `brief.json`, and `index.html` preview.
-2. `loop sheet <dir> [--every <n>] [--cols 4] [--engine auto|webkit|chromium] [--theme <t>]`
+2. `loop diff <dir> [--range <a..b> | --staged | --file <patch.diff>] [--repo <root>] [--title <text>] [--max-lines <n>]`
+   Parses a real unified git diff (or patch file) and generates a syntax-highlighted, dual-theme `scene.html` + `showcase.json` grounded to the changed `file:line` range and `"match"` symbol.
+3. `loop term <dir> --cmd "<command>" [--label "<text>"] [--output "<lines>"] [--input <file>] [--repo <root>] [--title <text>]`
+   Executes a real CLI command (or reads output text) and generates a dual-theme animated terminal `scene.html` + `showcase.json` with typing, streaming output, and exit-status badge.
+4. `loop sheet <dir> [--every <n>] [--cols 4] [--engine auto|webkit|chromium] [--theme <t>]`
    Renders a numbered contact sheet into `<dir>/sheet.png`.
 3. `loop story <dir> [--engine auto|webkit|chromium] [--theme <t>]`
    Renders Frame `0` plus the midpoint of each step in `showcase.json` into `<dir>/storyboard.png` for cold reading.

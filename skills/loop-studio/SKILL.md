@@ -27,10 +27,12 @@ Read the target repository's `README.md`, manifest, and key implementation files
 - Every step **must** cite a repo-relative `"source": "path/to/file:line"` (or `"file:start-end"`), plus optional `"match": ["SymbolName"]` to catch documentation drift when code moves.
 - Hand over continuously across the `1.0 -> 0.0` wrap boundary (e.g., Step 1 `from: 8.0, to: 3.0` on a `9s` loop).
 
-### 2. Scaffold & Author Modern HTML/CSS/SVG (`scene.html`) or GLSL (`shader.frag`)
-Scaffold with:
+### 2. Scaffold, Generate, or Author Modern HTML/CSS/SVG (`scene.html`) or GLSL (`shader.frag`)
+Start from a real repo artifact or clean starter:
 ```bash
-npx loop new <dir> --template html   # or code-diff | shader
+npx loop diff <dir> --range dev..HEAD                   # real git diff -> dual-theme code-diff scene
+npx loop term <dir> --cmd "npm test" --label "npm test" # real CLI output -> dual-theme terminal scene
+npx loop new <dir> --template html                      # clean HTML/CSS/SVG or code-diff | shader starter
 ```
 Author `scene.html` using standard HTML/CSS/SVG and the injected CSS theme variables so dark & light variants render automatically:
 - `--loop-ground`, `--loop-surface`, `--loop-body`, `--loop-muted`, `--loop-accent`, `--loop-spark`, `--loop-line`
