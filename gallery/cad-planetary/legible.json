@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "mode": "ambient",
+  "textElementsChecked": 2,
+  "captions": [
+    {
+      "text": "CAD // HARMONIC-3X",
+      "contrastRatio": 14.93,
+      "minMarginPx": 18,
+      "passContrast": true
+    },
+    {
+      "text": "THETA: 0 DEG",
+      "contrastRatio": 10.36,
+      "minMarginPx": 15,
+      "passContrast": true
+    }
+  ],
+  "reasons": []
+}

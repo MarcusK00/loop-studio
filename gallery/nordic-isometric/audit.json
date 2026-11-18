@@ -1,0 +1,13 @@
+{
+  "id": "nordic-isometric",
+  "title": "Harmonic Architecture (Isometric Grid)",
+  "mode": "ambient",
+  "pass": true,
+  "seamScore": 0.946,
+  "duplicateFrames": 0,
+  "flickerScore": 0.1,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 326.7,
+  "totalFrames": 80
+}

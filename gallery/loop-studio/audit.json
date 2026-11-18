@@ -1,0 +1,13 @@
+{
+  "id": "loop-studio",
+  "title": "Loop Studio Showcase (Flow Pipeline)",
+  "mode": "showcase",
+  "pass": true,
+  "seamScore": 1.066,
+  "duplicateFrames": 0,
+  "flickerScore": 0.307,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 779.9,
+  "totalFrames": 160
+}

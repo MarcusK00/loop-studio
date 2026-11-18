@@ -1,0 +1,42 @@
+{
+  "name": "loop-studio",
+  "version": "1.0.0",
+  "description": "Deterministic phase-driven seamless animation studio & verification CLI for coding agents (Showcase & Ambient loops to GIF, MP4, WebM, and PNG).",
+  "type": "module",
+  "bin": {
+    "loop": "./tool/bin/loop.js"
+  },
+  "main": "./tool/index.js",
+  "exports": {
+    ".": "./tool/index.js",
+    "./kit": "./tool/lib/loop-kit.js"
+  },
+  "scripts": {
+    "loop": "node ./tool/bin/loop.js",
+    "test": "node ./tool/test/run-evals.js",
+    "build:gallery": "node ./tool/scripts/build-gallery.js",
+    "doctor": "node ./tool/bin/loop.js doctor"
+  },
+  "keywords": [
+    "agent-skill",
+    "antigravity-plugin",
+    "claude-code-plugin",
+    "gemini-extension",
+    "seamless-loop",
+    "animation",
+    "gif",
+    "showcase",
+    "generative-art",
+    "canvas"
+  ],
+  "author": "Marcusk00",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Marcusk00/loop-studio.git"
+  },
+  "homepage": "https://github.com/Marcusk00/loop-studio#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

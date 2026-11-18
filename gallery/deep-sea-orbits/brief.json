@@ -1,0 +1,12 @@
+{
+  "title": "Abyssal Bioluminescence",
+  "prompt": "Make a 4-second square loop. Deep sea, slow, bioluminescent.",
+  "mode": "ambient",
+  "style": "particle-orbit",
+  "palette": "abyss",
+  "seconds": 4,
+  "fps": 20,
+  "width": 320,
+  "height": 320,
+  "seed": 42
+}

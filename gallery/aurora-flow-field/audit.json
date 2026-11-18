@@ -1,0 +1,13 @@
+{
+  "id": "aurora-flow-field",
+  "title": "Arctic Currents (Flow Field)",
+  "mode": "ambient",
+  "pass": true,
+  "seamScore": 1.013,
+  "duplicateFrames": 0,
+  "flickerScore": 0.025,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 1674.1,
+  "totalFrames": 80
+}

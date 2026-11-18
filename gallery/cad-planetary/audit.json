@@ -1,0 +1,13 @@
+{
+  "id": "cad-planetary",
+  "title": "Epicyclic Telemetry (Blueprint CAD)",
+  "mode": "ambient",
+  "pass": true,
+  "seamScore": 1.016,
+  "duplicateFrames": 0,
+  "flickerScore": 0.031,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 762.6,
+  "totalFrames": 80
+}

@@ -1,0 +1,71 @@
+{
+  "pass": true,
+  "width": 800,
+  "height": 320,
+  "phoneWidth": 400,
+  "frame0ShowsAllStageLabels": true,
+  "stageLabelsChecked": 4,
+  "captions": [
+    {
+      "step": 1,
+      "caption": "a request arrives: \"deep sea, square\"",
+      "words": 6,
+      "chars": 37,
+      "windowSeconds": 2.5,
+      "requiredSeconds": 2.3,
+      "passReadingTime": true,
+      "contrastRatio": 14.25,
+      "passContrast": true,
+      "minEdgeMarginPx": 44,
+      "phoneFontPx": 6.5,
+      "passMobileWidth": true,
+      "pass": true
+    },
+    {
+      "step": 2,
+      "caption": "sketch is drawn from the phase",
+      "words": 6,
+      "chars": 30,
+      "windowSeconds": 2.5,
+      "requiredSeconds": 2.3,
+      "passReadingTime": true,
+      "contrastRatio": 14.25,
+      "passContrast": true,
+      "minEdgeMarginPx": 44,
+      "phoneFontPx": 6.5,
+      "passMobileWidth": true,
+      "pass": true
+    },
+    {
+      "step": 3,
+      "caption": "seam and legibility are measured",
+      "words": 5,
+      "chars": 32,
+      "windowSeconds": 2.5,
+      "requiredSeconds": 2,
+      "passReadingTime": true,
+      "contrastRatio": 14.25,
+      "passContrast": true,
+      "minEdgeMarginPx": 44,
+      "phoneFontPx": 6.5,
+      "passMobileWidth": true,
+      "pass": true
+    },
+    {
+      "step": 4,
+      "caption": "the verified loop drops out",
+      "words": 5,
+      "chars": 27,
+      "windowSeconds": 2.5,
+      "requiredSeconds": 2,
+      "passReadingTime": true,
+      "contrastRatio": 14.25,
+      "passContrast": true,
+      "minEdgeMarginPx": 44,
+      "phoneFontPx": 6.5,
+      "passMobileWidth": true,
+      "pass": true
+    }
+  ],
+  "reasons": []
+}

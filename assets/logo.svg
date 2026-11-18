@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" fill="none">
+  <defs>
+    <linearGradient id="loopGrad" x1="28" y1="28" x2="228" y2="228" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF6B9D"/>
+      <stop offset="50%" stop-color="#C8306A"/>
+      <stop offset="100%" stop-color="#2A5BD7"/>
+    </linearGradient>
+    <linearGradient id="orbitGrad" x1="228" y1="40" x2="40" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7FA2FF"/>
+      <stop offset="100%" stop-color="#2A5BD7"/>
+    </linearGradient>
+  </defs>
+  <!-- Background tile with 10% safe margin (26px inset) -->
+  <rect x="26" y="26" width="204" height="204" rx="44" fill="#0E1120" stroke="#2A3050" stroke-width="6"/>
+  <!-- Outer phase ring -->
+  <circle cx="128" cy="128" r="68" stroke="url(#orbitGrad)" stroke-width="8" stroke-dasharray="14 10" opacity="0.55"/>
+  <!-- Infinity / Lissajous seamless phase curve -->
+  <path d="M 76 128 C 76 96, 110 96, 128 128 C 146 160, 180 160, 180 128 C 180 96, 146 96, 128 128 C 110 160, 76 160, 76 128 Z"
+        stroke="url(#loopGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Phase=0 / Phase=1 Seam Node Marker -->
+  <circle cx="180" cy="128" r="11" fill="#FF6B9D" stroke="#0E1120" stroke-width="4"/>
+  <circle cx="76" cy="128" r="8" fill="#7FA2FF" stroke="#0E1120" stroke-width="3"/>
+</svg>

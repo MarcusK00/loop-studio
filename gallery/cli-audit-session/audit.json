@@ -1,0 +1,13 @@
+{
+  "id": "cli-audit-session",
+  "title": "Loop CLI Audit Showcase (Terminal)",
+  "mode": "showcase",
+  "pass": true,
+  "seamScore": 0.998,
+  "duplicateFrames": 0,
+  "flickerScore": 1.366,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 805,
+  "totalFrames": 160
+}

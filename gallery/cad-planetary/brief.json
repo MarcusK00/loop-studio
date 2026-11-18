@@ -1,0 +1,12 @@
+{
+  "title": "Epicyclic Telemetry",
+  "prompt": "Precision engineering blueprint with planetary gear linkages rotating at 1x and -2x harmonic speeds.",
+  "mode": "ambient",
+  "style": "blueprint-cad",
+  "palette": "blueprint",
+  "seconds": 4,
+  "fps": 20,
+  "width": 320,
+  "height": 320,
+  "seed": 79
+}

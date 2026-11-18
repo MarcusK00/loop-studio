@@ -1,0 +1,13 @@
+{
+  "id": "deep-sea-orbits",
+  "title": "Abyssal Bioluminescence (Particle Orbit)",
+  "mode": "ambient",
+  "pass": true,
+  "seamScore": 0.974,
+  "duplicateFrames": 0,
+  "flickerScore": 0.024,
+  "legiblePass": true,
+  "sourcesPass": true,
+  "gifKB": 1173.2,
+  "totalFrames": 80
+}
