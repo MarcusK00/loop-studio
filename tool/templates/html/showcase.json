@@ -1,0 +1,31 @@
+{
+  "title": "Repository Showcase",
+  "says": "Reads source input, processes it deterministically, and outputs verified artifacts.",
+  "mode": "showcase",
+  "seconds": 9,
+  "fps": 24,
+  "width": 800,
+  "height": 380,
+  "palette": "studio-dark",
+  "stage": ["Input", "Transform", "Output"],
+  "steps": [
+    {
+      "from": 7.5,
+      "to": 1.5,
+      "caption": "reads input specification",
+      "source": "README.md:1"
+    },
+    {
+      "from": 1.5,
+      "to": 4.5,
+      "caption": "processes core pipeline state",
+      "source": "README.md:1"
+    },
+    {
+      "from": 4.5,
+      "to": 7.5,
+      "caption": "emits verified output artifact",
+      "source": "README.md:1"
+    }
+  ]
+}

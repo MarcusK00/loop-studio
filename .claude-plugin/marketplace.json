@@ -2,19 +2,19 @@
   "name": "loop-studio-marketplace",
   "owner": {
     "name": "Marcusk00",
-    "url": "https://github.com/Marcusk00"
+    "url": "https://github.com/MarcusK00"
   },
   "plugins": [
     {
       "name": "loop-studio",
       "source": "./",
-      "description": "Deterministic phase-driven seamless animation studio & verification CLI for coding agents.",
-      "version": "1.0.0",
+      "description": "Deterministic HTML/WebGL2 browser capture, dual-theme dark/light README bundles, and universal loop/source-drift auditing.",
+      "version": "2.0.0",
       "author": {
         "name": "Marcusk00"
       },
-      "homepage": "https://github.com/Marcusk00/loop-studio",
-      "tags": ["animation", "loop", "gif", "showcase", "video", "canvas"]
+      "homepage": "https://github.com/MarcusK00/loop-studio",
+      "tags": ["readme-demo", "loop", "gif", "webp", "audit", "wcag"]
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "title": "GLSL Iridescent Torus Shader",
+  "mode": "ambient",
+  "palette": "nebula",
+  "seconds": 4,
+  "fps": 30,
+  "width": 400,
+  "height": 400,
+  "seed": 17
+}

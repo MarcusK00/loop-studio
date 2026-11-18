@@ -1,0 +1,41 @@
+{
+  "title": "UI Product Showcase",
+  "says": "Loop Workbench previews phase, audits seam and contrast, and renders dark/light bundles.",
+  "mode": "showcase",
+  "seconds": 10,
+  "fps": 24,
+  "width": 800,
+  "height": 420,
+  "palette": "studio-dark",
+  "stage": ["Configure", "Preview", "Audit", "Publish"],
+  "steps": [
+    {
+      "from": 8.75,
+      "to": 1.25,
+      "caption": "configure loop fps and palette",
+      "source": "tool/lib/harness.js:23-35",
+      "match": ["resolveThemePalette", "studio-dark"]
+    },
+    {
+      "from": 1.25,
+      "to": 3.75,
+      "caption": "scrub phase across live waveform",
+      "source": "tool/lib/server.js:108-120",
+      "match": ["drawFrame", "__LOOP_STEP__"]
+    },
+    {
+      "from": 3.75,
+      "to": 6.25,
+      "caption": "verify seam score and contrast",
+      "source": "tool/lib/analyzers.js:34-36",
+      "match": ["analyzeSeam", "maxSeamScore"]
+    },
+    {
+      "from": 6.25,
+      "to": 8.75,
+      "caption": "publish verified dark & light loops",
+      "source": "tool/lib/encoders.js:683",
+      "match": ["encodeAnimatedWebP"]
+    }
+  ]
+}

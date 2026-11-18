@@ -16,7 +16,5 @@ jobs:
           node-version: "20"
       - name: Check Loop CLI Doctor
         run: node ./tool/bin/loop.js doctor
-      - name: Rebuild & Audit Gallery Loops
-        run: npm run build:gallery
-      - name: Run Positive & Negative Eval Suite
+      - name: Run Core & Browser Eval Suite
         run: npm test

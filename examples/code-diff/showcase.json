@@ -1,0 +1,34 @@
+{
+  "title": "Code Diff Refactor Showcase",
+  "says": "Loop Studio freezes wall clocks, steps pure phase, and audits seam and contrast.",
+  "mode": "showcase",
+  "seconds": 9,
+  "fps": 24,
+  "width": 800,
+  "height": 400,
+  "palette": "studio-dark",
+  "stage": ["Diff", "Phase Contract", "Verified"],
+  "steps": [
+    {
+      "from": 8.0,
+      "to": 3.0,
+      "caption": "detect clock drift and random jitter",
+      "source": "tool/lib/harness.js:82-88",
+      "match": ["FIXED_EPOCH", "Math.random"]
+    },
+    {
+      "from": 3.0,
+      "to": 6.0,
+      "caption": "replace timer state with pure phase",
+      "source": "tool/lib/harness.js:158-163",
+      "match": ["__LOOP_STEP__", "renderLoop(phase"]
+    },
+    {
+      "from": 6.0,
+      "to": 8.0,
+      "caption": "audit seam and WCAG contrast",
+      "source": "tool/lib/analyzers.js:34-94",
+      "match": ["analyzeSeam", "evaluateLegibilityFromTextLogs"]
+    }
+  ]
+}

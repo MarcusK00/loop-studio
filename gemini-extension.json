@@ -1,6 +1,6 @@
 {
   "name": "loop-studio",
-  "version": "1.0.0",
-  "description": "Produce verified, seamless animations and repo showcase loops (GIF, MP4, WebM, PNG) driven by deterministic phase math, seam analysis, legibility checks, and cold-read evaluation.",
+  "version": "2.0.0",
+  "description": "Deterministic HTML/WebGL2 browser capture, dual-theme dark/light README bundles, and universal loop/source-drift auditing.",
   "contextFileName": "AGENTS.md"
 }

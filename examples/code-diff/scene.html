@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(620px 320px at 50% 25%, color-mix(in srgb, var(--loop-spark) 14%, transparent), transparent 70%),
+        radial-gradient(480px 260px at 80% 80%, color-mix(in srgb, var(--loop-accent) 10%, transparent), transparent 72%),
+        var(--loop-ground);
+      color: var(--loop-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px 20px;
+      overflow: hidden;
+    }
+
+    .stage-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--loop-body);
+    }
+
+    .brand-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--loop-accent);
+      box-shadow: 0 0 12px var(--loop-accent);
+    }
+
+    .stages {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-pill {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--loop-line);
+      background: var(--loop-surface);
+      color: var(--loop-body);
+      opacity: 0.72;
+    }
+
+    .stage-pill.active {
+      opacity: 1;
+      border-color: var(--loop-spark);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--loop-spark) 40%, transparent);
+    }
+
+    .editor {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      margin: 12px 0;
+      background: var(--loop-surface);
+      border: 1px solid var(--loop-line);
+      border-radius: 12px;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-head {
+      height: 36px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--loop-line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: color-mix(in srgb, var(--loop-ground) 35%, var(--loop-surface));
+    }
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.r { background: #FF5F56; }
+    .dot.y { background: #FFBD2E; }
+    .dot.g { background: #27C93F; }
+
+    .file-tab {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--loop-body);
+    }
+
+    .status-chip {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--loop-line);
+      background: var(--loop-ground);
+      color: var(--loop-body);
+    }
+
+    .code-body {
+      position: relative;
+      flex: 1;
+      padding: 16px 0;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .scan-beam {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--loop-spark) 18%, transparent), color-mix(in srgb, var(--loop-accent) 12%, transparent));
+      border-left: 3px solid var(--loop-spark);
+      pointer-events: none;
+    }
+
+    .phase-ring {
+      width: 14px;
+      height: 14px;
+      flex: none;
+    }
+
+    .line {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      white-space: pre;
+    }
+
+    .line.del {
+      background: color-mix(in srgb, #FF5572 13%, transparent);
+    }
+
+    .line.add {
+      background: color-mix(in srgb, #00C98D 13%, transparent);
+    }
+
+    .lnum {
+      width: 28px;
+      color: var(--loop-muted);
+      font-size: 11.5px;
+      user-select: none;
+    }
+
+    .sig {
+      width: 20px;
+      font-weight: 700;
+      color: var(--loop-body);
+    }
+
+    .kw { color: var(--loop-accent); font-weight: 600; }
+    .fn { color: var(--loop-spark); font-weight: 600; }
+    .cm { color: var(--loop-muted); }
+
+    .caption-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--loop-surface);
+      border: 1px solid var(--loop-line);
+      border-radius: 10px;
+      padding: 7px 18px;
+      max-width: 92%;
+    }
+
+    .step-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .sdot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--loop-line);
+    }
+
+    .sdot.on {
+      background: var(--loop-accent);
+      transform: scale(1.25);
+    }
+
+    .caption-text {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--loop-body);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage-bar">
+    <div class="brand">
+      <svg class="phase-ring" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7" fill="none" stroke="var(--loop-line)" stroke-width="2.2" />
+        <circle id="ring-dot" cx="10" cy="3" r="2.8" fill="var(--loop-accent)" />
+      </svg>
+      <span>loop audit · refactor diff</span>
+    </div>
+    <div class="stages">
+      <span class="stage-pill" id="st-0" data-loop-stage>Diff</span>
+      <span class="stage-pill" id="st-1" data-loop-stage>Phase Contract</span>
+      <span class="stage-pill" id="st-2" data-loop-stage>Verified</span>
+    </div>
+  </div>
+
+  <div class="editor">
+    <div class="editor-head">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="file-tab">sketch.js · refactor/phase-loop</div>
+      <div class="status-chip" id="status-chip">seam: 1.00 PASS</div>
+    </div>
+    <div class="code-body" id="code-body">
+      <div class="scan-beam" id="scan-beam"></div>
+      <div class="line del" id="l0"><span class="lnum">12</span><span class="sig">-</span><span><span class="kw">const</span> x = (Date.now() * <span class="fn">0.12</span>) % W;</span></div>
+      <div class="line del" id="l1"><span class="lnum">13</span><span class="sig">-</span><span><span class="kw">const</span> jitter = Math.<span class="fn">random</span>() * <span class="fn">8</span>;</span></div>
+      <div class="line add" id="l2"><span class="lnum">12</span><span class="sig">+</span><span><span class="kw">const</span> turn = phase * kit.<span class="fn">TAU</span>; <span class="cm">// [0, 1)</span></span></div>
+      <div class="line add" id="l3"><span class="lnum">13</span><span class="sig">+</span><span><span class="kw">const</span> x = cx + Math.<span class="fn">cos</span>(turn) * r;</span></div>
+      <div class="line add" id="l4"><span class="lnum">14</span><span class="sig">+</span><span><span class="kw">const</span> n = kit.<span class="fn">loopNoise</span>(phase, <span class="fn">0.8</span>, <span class="fn">7</span>);</span></div>
+    </div>
+  </div>
+
+  <div class="caption-pill">
+    <div class="step-dots">
+      <span class="sdot" id="d0"></span>
+      <span class="sdot" id="d1"></span>
+      <span class="sdot" id="d2"></span>
+    </div>
+    <span class="caption-text" id="caption-text" data-loop-caption>detect clock drift and random jitter</span>
+  </div>
+
+  <script>
+    window.renderLoop = function(phase, kit, meta) {
+      const S = window.__LOOP_SHOWCASE__ || {};
+      const seconds = S.seconds || (meta && meta.seconds) || 9;
+      const steps = Array.isArray(S.steps) ? S.steps : [];
+      const t = phase * seconds;
+      const TAU = Math.PI * 2;
+
+      let activeIdx = 0;
+      let activeCaption = "detect clock drift and random jitter";
+      let capOpacity = 1;
+      steps.forEach((st, idx) => {
+        const len = ((st.to - st.from) % seconds + seconds) % seconds || seconds;
+        const u = ((t - st.from) % seconds + seconds) % seconds;
+        if (u < len) {
+          activeIdx = idx;
+          activeCaption = st.caption;
+          capOpacity = Math.max(0.2, Math.min(1, u / 0.45, (len - u) / 0.45));
+        }
+      });
+
+      const capEl = document.getElementById("caption-text");
+      capEl.textContent = activeCaption;
+      capEl.style.opacity = capOpacity.toFixed(3);
+
+      for (let i = 0; i < 3; i++) {
+        document.getElementById("st-" + i).classList.toggle("active", i === activeIdx);
+        document.getElementById("d" + i).classList.toggle("on", i === activeIdx);
+      }
+
+      // Constant angular velocity ring dot + continuous header glow pulse keeps median step delta uniform
+      const ringAng = phase * TAU - Math.PI / 2;
+      const ringDot = document.getElementById("ring-dot");
+      ringDot.setAttribute("cx", (10 + Math.cos(ringAng) * 7).toFixed(2));
+      ringDot.setAttribute("cy", (10 + Math.sin(ringAng) * 7).toFixed(2));
+
+      // Ping-pong scan-beam at uniform cruise speed with tiny turnarounds
+      const ping = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+      const lineFloat = 4.0 * (0.25 * ping + 0.75 * (0.5 - 0.5 * Math.cos(ping * Math.PI)));
+      const topOffset = 16 + lineFloat * 30;
+      const beamEl = document.getElementById("scan-beam");
+      beamEl.style.top = topOffset.toFixed(1) + "px";
+
+      // Subtle cyclic ambient glow shift on editor border
+      const editorEl = document.querySelector(".editor");
+      const glowAlpha = (0.14 + 0.12 * (0.5 + 0.5 * Math.sin(phase * TAU))).toFixed(3);
+      editorEl.style.boxShadow = `0 18px 44px rgba(0, 0, 0, 0.28), 0 0 28px color-mix(in srgb, var(--loop-spark) ${Math.round(glowAlpha * 100)}%, transparent)`;
+
+      const chip = document.getElementById("status-chip");
+      if (activeIdx === 0) chip.textContent = "seam: 3.46 FAIL";
+      else if (activeIdx === 1) chip.textContent = "phase ∈ [0, 1)";
+      else chip.textContent = "seam: 1.00 PASS";
+
+      // Smoothly ease removed-line dimming in/out so low-fps previews never flicker at step edges
+      const dimWin = t >= 5.6 && t <= 8.4 ? Math.sin(((t - 5.6) / 2.8) * Math.PI) : 0;
+      const delOpacity = (1.0 - 0.45 * dimWin).toFixed(3);
+      document.getElementById("l0").style.opacity = delOpacity;
+      document.getElementById("l1").style.opacity = delOpacity;
+    };
+  </script>
+</body>
+</html>
