@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; width: 100vw; height: 100vh;
+      background:
+        radial-gradient(580px 280px at 26% 20%, color-mix(in srgb, var(--loop-accent) 12%, transparent), transparent 72%),
+        radial-gradient(580px 280px at 78% 82%, color-mix(in srgb, var(--loop-spark) 14%, transparent), transparent 72%),
+        var(--loop-ground);
+      color: var(--loop-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      padding: 20px 28px; overflow: hidden;
+    }
+    .stage-bar { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+    .phase-ring { width: 16px; height: 16px; flex: none; }
+    .stages { display: flex; gap: 8px; }
+    .stage-pill {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 999px; border: 1px solid var(--loop-line);
+      background: var(--loop-surface); color: var(--loop-body); opacity: 0.72;
+    }
+    .stage-pill.active { opacity: 1; border-color: var(--loop-accent); background: var(--loop-accent); color: var(--loop-on-accent); }
+    .term {
+      width: 100%; flex: 1; margin: 12px 0; background: var(--loop-surface);
+      border: 1px solid var(--loop-line); border-radius: 13px;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.24); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .term-head {
+      height: 36px; padding: 0 14px; border-bottom: 1px solid var(--loop-line);
+      display: flex; align-items: center; justify-content: space-between;
+      background: color-mix(in srgb, var(--loop-ground) 38%, var(--loop-surface));
+    }
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.r { background: #FF5F56; } .dot.y { background: #FFBD2E; } .dot.g { background: #27C93F; }
+    .term-title { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; font-weight: 600; color: var(--loop-muted); }
+    .exit-chip {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 6px; border: 1px solid var(--loop-line);
+      background: var(--loop-ground); color: var(--loop-body);
+    }
+    .exit-chip.done { background: var(--loop-spark); border-color: var(--loop-spark); color: var(--loop-on-spark); }
+    .term-body {
+      position: relative; flex: 1; padding: 14px 18px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px; line-height: 27px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .scan-row {
+      position: absolute; left: 0; right: 0; height: 27px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--loop-spark) 15%, transparent), color-mix(in srgb, var(--loop-accent) 10%, transparent));
+      border-left: 3px solid var(--loop-spark); pointer-events: none;
+    }
+    .prompt-row { position: relative; display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 6px; white-space: pre; }
+    .ps { color: var(--loop-accent); font-weight: 700; }
+    .caret { display: inline-block; width: 8px; height: 15px; background: var(--loop-accent); vertical-align: middle; margin-left: 2px; border-radius: 1px; }
+    .tline { position: relative; white-space: pre; overflow: hidden; opacity: 0.72; }
+    .tline.ok { color: var(--loop-spark); font-weight: 600; }
+    .tline.err { color: var(--loop-accent); font-weight: 600; }
+    .tline.dim { color: var(--loop-muted); }
+    .caption-pill {
+      display: flex; align-items: center; gap: 10px; background: var(--loop-surface);
+      border: 1px solid var(--loop-line); border-radius: 10px; padding: 7px 18px;
+    }
+    .caption-text { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13.5px; font-weight: 600; color: var(--loop-body); }
+  </style>
+</head>
+<body>
+  <div class="stage-bar">
+    <div class="brand">
+      <svg class="phase-ring" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7" fill="none" stroke="var(--loop-line)" stroke-width="2.2" />
+        <circle id="ring-dot" cx="10" cy="3" r="2.8" fill="var(--loop-accent)" />
+      </svg>
+      <span>Loop CLI Audit</span>
+    </div>
+    <div class="stages">
+      <span class="stage-pill" id="st-0" data-loop-stage>Command</span>
+      <span class="stage-pill" id="st-1" data-loop-stage>Output</span>
+      <span class="stage-pill" id="st-2" data-loop-stage>Status</span>
+    </div>
+  </div>
+
+  <div class="term">
+    <div class="term-head">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="term-title">zsh · loop-studio</div>
+      <div class="exit-chip" id="exit-chip">running…</div>
+    </div>
+    <div class="term-body">
+      <div class="scan-row" id="scan-row"></div>
+      <div class="prompt-row"><span class="ps">$</span><span id="cmd-typed">loop audit ./examples/code-diff --themes dark,light</span><span class="caret" id="caret"></span></div>
+      <div class="tline plain" id="ol-0">backend: webkit (216 frames @ 24fps)</div>
+      <div class="tline ok" id="ol-1">seamScore: 0.472 PASS (duplicateFrames: 0)</div>
+      <div class="tline ok" id="ol-2">dark theme WCAG: 13.4:1 PASS (0 overflow)</div>
+      <div class="tline ok" id="ol-3">light theme WCAG: 12.8:1 PASS (0 overflow)</div>
+      <div class="tline ok" id="ol-4">sources: 3/3 file:line + match tokens verified</div>
+      <div class="tline plain" id="ol-5">ready: loop render --themes dark,light --formats webp</div>
+    </div>
+  </div>
+
+  <div class="caption-pill">
+    <span class="caption-text" id="caption-text" data-loop-caption>run CLI command</span>
+  </div>
+
+  <script>
+    window.renderLoop = function(phase, kit, meta) {
+      const S = window.__LOOP_SHOWCASE__ || {};
+      const seconds = S.seconds || (meta && meta.seconds) || 9;
+      const steps = Array.isArray(S.steps) ? S.steps : [];
+      const t = phase * seconds;
+      const TAU = Math.PI * 2;
+      const lineCount = 6;
+
+      let activeIdx = 0;
+      let activeCaption = steps[0] ? steps[0].caption : "";
+      steps.forEach((st, idx) => {
+        const len = ((st.to - st.from) % seconds + seconds) % seconds || seconds;
+        const u = ((t - st.from) % seconds + seconds) % seconds;
+        if (u < len) {
+          activeIdx = idx;
+          activeCaption = st.caption;
+        }
+      });
+
+      document.getElementById("caption-text").textContent = activeCaption;
+      for (let i = 0; i < 3; i++) {
+        document.getElementById("st-" + i).classList.toggle("active", i === activeIdx);
+      }
+
+      const ang = phase * TAU - Math.PI / 2;
+      const dot = document.getElementById("ring-dot");
+      dot.setAttribute("cx", (10 + Math.cos(ang) * 7).toFixed(2));
+      dot.setAttribute("cy", (10 + Math.sin(ang) * 7).toFixed(2));
+
+      const blink = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(TAU * phase * 4));
+      document.getElementById("caret").style.opacity = blink.toFixed(2);
+
+      // Smooth ping-pong telemetry scanner across output lines (zero wrap jump)
+      const ping = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+      const easedPing = 0.25 * ping + 0.75 * (0.5 - 0.5 * Math.cos(ping * Math.PI));
+      const scanIdx = easedPing * Math.max(0, lineCount - 1);
+      const scanTop = 47 + scanIdx * (27 + 2);
+      document.getElementById("scan-row").style.top = scanTop.toFixed(1) + "px";
+
+      for (let i = 0; i < lineCount; i++) {
+        const dist = Math.abs(i - scanIdx);
+        const focus = Math.max(0, 1 - dist / 2.2);
+        const el = document.getElementById("ol-" + i);
+        el.style.opacity = (0.52 + 0.48 * focus).toFixed(3);
+      }
+
+      const chip = document.getElementById("exit-chip");
+      const done = activeIdx === 2;
+      chip.classList.toggle("done", done);
+      chip.textContent = done ? "exit 0 · PASS" : activeIdx === 0 ? "running…" : "streaming…";
+    };
+  </script>
+</body>
+</html>

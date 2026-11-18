@@ -1,30 +1,35 @@
 // Loop Studio — Frame Renderer, Contact Sheet Tiler (`loop sheet`), and Storyboard Compositor (`loop story`)
 
-import { SoftCanvas2D } from "./soft-canvas.js";
-import { createKit } from "./loop-kit.js";
+import { BitmapBuffer } from "./bitmap.js";
+import { renderProjectPhases } from "./renderer.js";
 
-export function renderAllFrames(sketchModule, overrides = {}) {
-  const meta = { ...sketchModule.meta, ...overrides };
-  const W = meta.width || 640;
-  const H = meta.height || 640;
-  const seconds = meta.seconds || 4;
+export async function renderProjectFrames(project, opts = {}) {
+  const meta = { ...project.meta, ...opts };
+  const W = meta.width || 800;
+  const H = meta.height || 400;
+  const seconds = meta.seconds || 6;
   const fps = meta.fps || 24;
   const totalFrames = Math.max(2, Math.round(seconds * fps));
-  const kit = createKit({
-    showcase: overrides.showcase || sketchModule.showcase
-  });
-
-  const frames = [];
-  // Crucial Phase Contract rule: render frames 0 .. totalFrames - 1 (NEVER frame N!)
+  const phases = [];
   for (let f = 0; f < totalFrames; f++) {
-    const phase = f / totalFrames;
-    const cv = new SoftCanvas2D(W, H);
-    sketchModule.render(cv, phase, kit);
-    frames.push(cv.data);
+    phases.push(f / totalFrames);
   }
 
+  const res = await renderProjectPhases({
+    absDir: project.absDir,
+    sketchModule: project.sketchModule,
+    meta,
+    showcase: opts.showcase || project.showcaseJson,
+    width: W,
+    height: H,
+    phases,
+    engine: opts.engine || "auto",
+    theme: opts.theme || null
+  });
+
   return {
-    frames,
+    backend: res.backend,
+    frames: res.frames,
     width: W,
     height: H,
     seconds,
@@ -57,109 +62,105 @@ function blitScaled(dstCanvas, srcRgba, srcW, srcH, dx, dy, dw, dh) {
   }
 }
 
-export function renderContactSheet(sketchModule, opts = {}) {
-  const meta = { ...sketchModule.meta, ...opts };
-  const srcW = meta.width || 400;
-  const srcH = meta.height || 400;
-  const seconds = meta.seconds || 4;
-  const fps = meta.fps || 24;
-  const totalFrames = Math.max(4, Math.round(seconds * fps));
-  const every = opts.every || Math.max(1, Math.floor(totalFrames / 12));
-  const cols = opts.cols || 4;
-
-  const sampleFrames = [];
-  for (let f = 0; f < totalFrames; f += every) {
-    sampleFrames.push(f);
-  }
-  const rows = Math.ceil(sampleFrames.length / cols);
-  const tileW = Math.min(240, srcW);
+export function composeContactSheetFromFrames(sampledPairs, srcW, srcH, seconds, fps, totalFrames, cols = 4) {
+  const rows = Math.ceil(sampledPairs.length / cols);
+  const tileW = Math.min(260, srcW);
   const tileH = Math.round((tileW * srcH) / srcW);
   const pad = 12;
   const headerH = 42;
 
   const sheetW = cols * tileW + (cols + 1) * pad;
   const sheetH = headerH + rows * tileH + (rows + 1) * pad;
-  const sheet = new SoftCanvas2D(sheetW, sheetH);
+  const sheet = new BitmapBuffer(sheetW, sheetH);
 
-  sheet.fillStyle = "#0E1120";
-  sheet.fillRect(0, 0, sheetW, sheetH);
-
-  // Header title
-  sheet.font = "600 13px monospace";
-  sheet.fillStyle = "#E7E9F4";
-  sheet.textAlign = "left";
-  sheet.textBaseline = "middle";
-  sheet.fillText(
-    `LOOP STUDIO CONTACT SHEET // ${totalFrames}f (${seconds}s @ ${fps}fps) // ${srcW}x${srcH}`,
+  sheet.fillRect(0, 0, sheetW, sheetH, "#0E1120");
+  sheet.drawText(
+    `LOOP CONTACT SHEET // ${totalFrames}F (${seconds}S @ ${fps}FPS) // ${srcW}X${srcH}`,
     pad,
-    headerH / 2
+    14,
+    "#E7E9F4",
+    2
   );
 
-  const kit = createKit({ showcase: opts.showcase || sketchModule.showcase });
-
-  sampleFrames.forEach((f, idx) => {
+  sampledPairs.forEach(({ f, phase, rgba }, idx) => {
     const col = idx % cols;
     const row = Math.floor(idx / cols);
     const dx = pad + col * (tileW + pad);
     const dy = headerH + pad + row * (tileH + pad);
-    const phase = f / totalFrames;
 
-    const cv = new SoftCanvas2D(srcW, srcH);
-    sketchModule.render(cv, phase, kit);
-    blitScaled(sheet, cv.data, srcW, srcH, dx, dy, tileW, tileH);
+    blitScaled(sheet, rgba, srcW, srcH, dx, dy, tileW, tileH);
+    sheet.strokeRect(dx, dy, tileW, tileH, "#2A3050", 1);
 
-    // Tile border
-    sheet.strokeStyle = "#2A3050";
-    sheet.lineWidth = 1;
-    sheet.strokeRect(dx, dy, tileW, tileH);
-
-    // Frame & phase badge
-    const badgeText = `f:${String(f).padStart(3, "0")} p:${phase.toFixed(2)}`;
-    sheet.fillStyle = "#0A0C18";
-    sheet.globalAlpha = 0.84;
-    sheet.fillRect(dx + 6, dy + 6, 108, 18);
-    sheet.globalAlpha = 1;
-    sheet.font = "600 11px monospace";
-    sheet.fillStyle = "#FF6B9D";
-    sheet.textAlign = "left";
-    sheet.textBaseline = "middle";
-    sheet.fillText(badgeText, dx + 10, dy + 15);
+    const badgeText = `F:${String(f).padStart(3, "0")} P:${phase.toFixed(2)}`;
+    sheet.fillRect(dx + 6, dy + 6, badgeText.length * 6 + 10, 15, "#0A0C18", 0.85);
+    sheet.drawText(badgeText, dx + 10, dy + 10, "#FF6B9D", 1);
   });
 
   return sheet;
 }
 
-export function renderStoryboard(sketchModule, showcaseJson, opts = {}) {
-  const meta = { ...sketchModule.meta, ...opts };
-  const S = showcaseJson || sketchModule.showcase || {
-    says: "Loop Studio showcase",
-    seconds: meta.seconds || 10,
+export async function renderProjectContactSheet(project, opts = {}) {
+  const meta = { ...project.meta, ...opts };
+  const srcW = meta.width || 800;
+  const srcH = meta.height || 400;
+  const seconds = meta.seconds || 6;
+  const fps = meta.fps || 24;
+  const totalFrames = Math.max(4, Math.round(seconds * fps));
+  const every = opts.every || Math.max(1, Math.floor(totalFrames / 12));
+  const cols = opts.cols || 4;
+
+  const sampleFrames = [];
+  const phases = [];
+  for (let f = 0; f < totalFrames; f += every) {
+    sampleFrames.push(f);
+    phases.push(f / totalFrames);
+  }
+
+  const res = await renderProjectPhases({
+    absDir: project.absDir,
+    sketchModule: project.sketchModule,
+    meta,
+    showcase: opts.showcase || project.showcaseJson,
+    width: srcW,
+    height: srcH,
+    phases,
+    engine: opts.engine || "auto",
+    theme: opts.theme || null
+  });
+
+  const sampledPairs = sampleFrames.map((f, idx) => ({
+    f,
+    phase: phases[idx],
+    rgba: res.frames[idx]
+  }));
+
+  return composeContactSheetFromFrames(sampledPairs, srcW, srcH, seconds, fps, totalFrames, cols);
+}
+
+function buildStoryboardPanels(showcaseJson, meta) {
+  const S = showcaseJson || {
+    says: "Loop showcase",
+    seconds: meta.seconds || 9,
     steps: [
-      { from: 0, to: 2.5, caption: "Step 1" },
-      { from: 2.5, to: 5.0, caption: "Step 2" },
-      { from: 5.0, to: 7.5, caption: "Step 3" },
-      { from: 7.5, to: 10.0, caption: "Step 4" }
+      { from: 0, to: 3, caption: "Step 1" },
+      { from: 3, to: 6, caption: "Step 2" },
+      { from: 6, to: 9, caption: "Step 3" }
     ]
   };
-
-  const srcW = meta.width || 800;
-  const srcH = meta.height || 320;
-  const SECONDS = S.seconds || meta.seconds || 10;
-  const kit = createKit({ showcase: S });
-
-  // Panel 0 = Frame 0 (thumbnail), Panels 1..K = midpoint of each step
-  const panels = [
-    { label: "PANEL 0 · FRAME 0 (t=0.0s THUMBNAIL)", phase: 0 }
-  ];
+  const SECONDS = S.seconds || meta.seconds || 9;
+  const panels = [{ label: "PANEL 0 · FRAME 0 (T=0.0S THUMBNAIL)", phase: 0 }];
   (S.steps || []).forEach((step, idx) => {
     const span = (((step.to - step.from) % SECONDS) + SECONDS) % SECONDS || SECONDS;
     const midSec = (step.from + span * 0.5) % SECONDS;
     panels.push({
-      label: `PANEL ${idx + 1} · STEP ${idx + 1} (t=${midSec.toFixed(1)}s)`,
+      label: `PANEL ${idx + 1} · STEP ${idx + 1} (T=${midSec.toFixed(1)}S)`,
       phase: midSec / SECONDS
     });
   });
+  return { S, panels };
+}
 
+export function composeStoryboardFromPanels(panels, renderedRgba, srcW, srcH) {
   const tileW = Math.min(800, srcW);
   const tileH = Math.round((tileW * srcH) / srcW);
   const pad = 16;
@@ -168,33 +169,42 @@ export function renderStoryboard(sketchModule, showcaseJson, opts = {}) {
 
   const boardW = tileW + pad * 2;
   const boardH = headerH + panels.length * (tileH + labelH + pad) + pad;
-  const board = new SoftCanvas2D(boardW, boardH);
+  const board = new BitmapBuffer(boardW, boardH);
 
-  board.fillStyle = "#0E1120";
-  board.fillRect(0, 0, boardW, boardH);
-
-  board.font = "600 13px monospace";
-  board.fillStyle = "#7FA2FF";
-  board.textAlign = "left";
-  board.textBaseline = "middle";
-  board.fillText(`SHOWCASE STORYBOARD // ${panels.length} PANELS`, pad, headerH / 2);
+  board.fillRect(0, 0, boardW, boardH, "#0E1120");
+  board.drawText(`SHOWCASE STORYBOARD // ${panels.length} PANELS`, pad, 15, "#7FA2FF", 2);
 
   panels.forEach((p, idx) => {
     const dy = headerH + idx * (tileH + labelH + pad);
-    board.font = "600 12px monospace";
-    board.fillStyle = "#FF6B9D";
-    board.textAlign = "left";
-    board.textBaseline = "middle";
-    board.fillText(p.label, pad, dy + 11);
-
-    const cv = new SoftCanvas2D(srcW, srcH);
-    sketchModule.render(cv, p.phase, kit);
-    blitScaled(board, cv.data, srcW, srcH, pad, dy + labelH, tileW, tileH);
-
-    board.strokeStyle = "#2A3050";
-    board.lineWidth = 1.5;
-    board.strokeRect(pad, dy + labelH, tileW, tileH);
+    board.drawText(p.label, pad, dy + 6, "#FF6B9D", 1.5);
+    blitScaled(board, renderedRgba[idx], srcW, srcH, pad, dy + labelH, tileW, tileH);
+    board.strokeRect(pad, dy + labelH, tileW, tileH, "#2A3050", 1);
   });
 
   return board;
+}
+
+export async function renderProjectStoryboard(project, opts = {}) {
+  const meta = { ...project.meta, ...opts };
+  const srcW = meta.width || 800;
+  const srcH = meta.height || 400;
+  const { S, panels } = buildStoryboardPanels(project.showcaseJson || project.sketchModule?.showcase, meta);
+
+  const res = await renderProjectPhases({
+    absDir: project.absDir,
+    sketchModule: project.sketchModule,
+    meta,
+    showcase: S,
+    width: srcW,
+    height: H_SAFE(srcH),
+    phases: panels.map((p) => p.phase),
+    engine: opts.engine || "auto",
+    theme: opts.theme || null
+  });
+
+  return composeStoryboardFromPanels(panels, res.frames, srcW, srcH);
+}
+
+function H_SAFE(h) {
+  return Math.max(1, Math.round(h));
 }

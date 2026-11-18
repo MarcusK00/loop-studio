@@ -1,26 +1,30 @@
-# Loop CLI Tool Reference (`docs/tool.md`)
+# Loop CLI Reference (`docs/tool.md`)
 
-The `loop` command (`tool/bin/loop.js`) drives project scaffolding, preview contact sheets, storyboards, seam and legibility measurement, source citation verification, and final encoding.
+The `loop` CLI (`tool/bin/loop.js`) scaffolds HTML/GLSL loop scenes, drives deterministic browser capture (macOS WebKit or Chrome/Chromium CDP), audits internal projects or external videos, and exports WebP/GIF/MP4/PNG bundles.
 
 ## Commands
 
-1. `loop new <dir> [--mode showcase|ambient] [--scene <id>] [--style <id>] [--palette <id>]`
-   Creates `<dir>/sketch.js`, `<dir>/showcase.json` or `<dir>/brief.json`, and `<dir>/index.html`.
-2. `loop sheet <dir> [--every 8] [--cols 4]`
-   Renders every Nth frame with frame numbers and phase readouts into `<dir>/sheet.png`.
-3. `loop story <dir>`
-   Renders Frame `0` (static thumbnail) plus the midpoint frame of each step in `showcase.json` into `<dir>/storyboard.png`.
-4. `loop seam <dir>`
-   Measures frame-to-frame RMS pixel changes and computes `seamScore` (last-to-first change divided by median frame-to-frame change), `duplicateFrames`, and `flickerScore` into `<dir>/seam.json`.
-5. `loop legible <dir>`
-   Verifies caption reading time (`>= 0.5 + 0.3 * words` seconds), WCAG AA contrast (`>= 4.5:1`), safe edge margins, and 400px phone readability into `<dir>/legible.json`.
-6. `loop source-check <dir> [--repo <root>]`
-   Verifies every `"source": "file:line"` in `showcase.json` exists in the repository and writes `<dir>/sources.json`.
-7. `loop audit <dir> [--repo <root>]`
-   Runs `seam`, `legible`, and `source-check` together and writes `<dir>/audit.json`.
-8. `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png|all] [--width <n>] [--height <n>]`
-   Renders all frames `0..N-1` at full resolution and outputs `showcase.gif` / `loop.gif`, `poster.png`, `loop.mp4` (via FFmpeg or native macOS AVFoundation at `30/60/120 fps`), Animated `.webp` (via `cwebp`+`webpmux` or FFmpeg), and `.webm` (when FFmpeg is present).
+1. `loop new <dir> [--template html|code-diff|shader] [--palette <id>] [--force]`
+   Scaffolds a starter `scene.html` or `shader.frag`, `showcase.json` or `brief.json`, and `index.html` preview.
+2. `loop diff <dir> [--range <a..b> | --staged | --file <patch.diff>] [--repo <root>] [--title <text>] [--max-lines <n>]`
+   Parses a real unified git diff (or patch file) and generates a syntax-highlighted, dual-theme `scene.html` + `showcase.json` grounded to the changed `file:line` range and `"match"` symbol.
+3. `loop term <dir> --cmd "<command>" [--label "<text>"] [--output "<lines>"] [--input <file>] [--repo <root>] [--title <text>]`
+   Executes a real CLI command (or reads output text) and generates a dual-theme animated terminal `scene.html` + `showcase.json` with typing, streaming output, and exit-status badge.
+4. `loop sheet <dir> [--every <n>] [--cols 4] [--engine auto|webkit|chromium] [--theme <t>]`
+   Renders a numbered contact sheet into `<dir>/sheet.png`.
+3. `loop story <dir> [--engine auto|webkit|chromium] [--theme <t>]`
+   Renders Frame `0` plus the midpoint of each step in `showcase.json` into `<dir>/storyboard.png` for cold reading.
+4. `loop seam <dir|video> [--engine auto|webkit|chromium] [--lossy]`
+   Measures frame-to-frame RMS pixel deltas, `seamScore`, `duplicateFrames`, and `flickerScore`. Accepts either a project folder or any external `.gif`/`.mp4`/`.webp`/`.webm` file (via `ffmpeg`).
+5. `loop legible <dir> [--engine auto|webkit|chromium] [--themes dark,light]`
+   Verifies Frame `0` stage labels, caption reading duration (`>= 0.5 + 0.3 * words`), DOM overflow (`scrollWidth > clientWidth`), `400px` mobile sizing, and 8-point rendered RGBA WCAG `4.5:1` contrast across one or more themes.
+6. `loop source-check <dir|showcase.json> [--repo <root>]`
+   Enforces repo-relative `file:line` (or `file:start-end`) citations, rejects path traversal, and validates optional `"match"` tokens against code within ±3 lines.
+7. `loop audit <dir|video> [--repo <root>] [--showcase <file>] [--themes dark,light] [--max-kb <n>]`
+   Unified verification gate combining `seam`, `legible`, `source-check`, and optional file-size budget (`0` pass, `1` audit fail, `2` missing runtime dependency or invalid input).
+8. `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png|all] [--themes dark,light] [--max-kb <n>]`
+   Renders full-resolution PNG poster, delta-compressed GIF89a, Animated `.webp` (`img2webp` / `cwebp+webpmux` / `ffmpeg`), `.mp4` (`AVFoundation` / `ffmpeg`), and `.webm` (`ffmpeg`), emitting copy-paste `<picture>` Markdown when `--themes dark,light` is used.
 9. `loop serve <dir> [--port 4173]`
-   Opens the interactive browser workbench with phase scrubber and mobile width toggle.
+   Opens the interactive browser workbench with phase scrubber, theme toggle, and `400px` mobile toggle.
 10. `loop doctor`
-    Reports available rendering and encoding backends.
+    Reports available browser and media encoders/decoders.

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      background:
+        radial-gradient(560px 280px at 22% 18%, color-mix(in srgb, var(--loop-accent) 12%, transparent), transparent 70%),
+        radial-gradient(560px 300px at 78% 82%, color-mix(in srgb, var(--loop-spark) 14%, transparent), transparent 72%),
+        var(--loop-ground);
+      color: var(--loop-body);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stage-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .st-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--loop-line);
+      background: var(--loop-surface);
+      color: var(--loop-body);
+      opacity: 0.72;
+    }
+
+    .st-pill.active {
+      opacity: 1;
+      border-color: var(--loop-accent);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--loop-accent) 45%, transparent);
+    }
+
+    .app-frame {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      margin: 12px 0;
+      background: var(--loop-surface);
+      border: 1px solid var(--loop-line);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      display: grid;
+      grid-template-columns: 168px 1fr;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--loop-line);
+      padding: 16px 14px;
+      background: color-mix(in srgb, var(--loop-ground) 40%, var(--loop-surface));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--loop-muted);
+      margin-bottom: 4px;
+    }
+
+    .nav-item {
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 8px;
+      color: var(--loop-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-item.active {
+      background: color-mix(in srgb, var(--loop-spark) 16%, transparent);
+      color: var(--loop-body);
+    }
+
+    .main {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .metric {
+      background: var(--loop-ground);
+      border: 1px solid var(--loop-line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--loop-muted);
+      font-weight: 600;
+    }
+
+    .metric-val {
+      margin-top: 4px;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--loop-body);
+    }
+
+    .chart-card {
+      flex: 1;
+      background: var(--loop-ground);
+      border: 1px solid var(--loop-line);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .cta-btn {
+      position: relative;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--loop-accent);
+      background: var(--loop-accent);
+      color: var(--loop-on-accent);
+    }
+
+    .cta-btn.published {
+      background: var(--loop-spark);
+      border-color: var(--loop-spark);
+      color: var(--loop-on-spark);
+    }
+
+    .ripple {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--loop-accent);
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
+    }
+
+    .cursor {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+    }
+
+    .caption-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--loop-surface);
+      border: 1px solid var(--loop-line);
+      border-radius: 10px;
+      padding: 7px 18px;
+    }
+
+    .caption-text {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--loop-body);
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <strong style="font-size:13.5px;letter-spacing:0.01em;">Loop Workbench</strong>
+    <div class="stage-row">
+      <span class="st-pill" id="st-0" data-loop-stage>Configure</span>
+      <span class="st-pill" id="st-1" data-loop-stage>Preview</span>
+      <span class="st-pill" id="st-2" data-loop-stage>Audit</span>
+      <span class="st-pill" id="st-3" data-loop-stage>Publish</span>
+    </div>
+  </div>
+
+  <div class="app-frame" id="app-frame">
+    <aside class="sidebar">
+      <div class="nav-title">Workspace</div>
+      <div class="nav-item" id="nav-0">• Brief & Specs</div>
+      <div class="nav-item" id="nav-1">• Phase Scrubber</div>
+      <div class="nav-item" id="nav-2">• Seam Audit</div>
+      <div class="nav-item" id="nav-3">• Export Bundle</div>
+    </aside>
+
+    <section class="main">
+      <div class="cards">
+        <div class="metric">
+          <div class="metric-label">Frame Rate</div>
+          <div class="metric-val" id="m-fps">60 fps</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Seam Delta</div>
+          <div class="metric-val" id="m-seam">1.00×</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Contrast</div>
+          <div class="metric-val">13.4:1</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head">
+          <span>Phase Stability Waveform</span>
+          <button class="cta-btn" id="cta-btn" type="button">Export Loop</button>
+        </div>
+        <svg id="wave-svg" viewBox="0 0 520 110" width="100%" height="106" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="wg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--loop-accent)" />
+              <stop offset="100%" stop-color="var(--loop-spark)" />
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="55" x2="520" y2="55" stroke="var(--loop-line)" stroke-dasharray="4 4" stroke-width="1" />
+          <path id="wave-path" fill="none" stroke="url(#wg)" stroke-width="3" stroke-linecap="round" />
+          <circle id="wave-dot" r="5.5" fill="var(--loop-accent)" stroke="var(--loop-ground)" stroke-width="2" />
+        </svg>
+      </div>
+
+      <div class="ripple" id="ripple"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24">
+        <path d="M4 3 L19 12 L12 14 L9 21 Z" fill="var(--loop-body)" stroke="var(--loop-ground)" stroke-width="1.8" stroke-linejoin="round" />
+      </svg>
+    </section>
+  </div>
+
+  <div class="caption-pill">
+    <span class="caption-text" id="caption-text" data-loop-caption>configure loop fps and palette</span>
+  </div>
+
+  <script>
+    window.renderLoop = function(phase, kit, meta) {
+      const S = window.__LOOP_SHOWCASE__ || {};
+      const seconds = S.seconds || (meta && meta.seconds) || 6;
+      const steps = Array.isArray(S.steps) ? S.steps : [];
+      const t = phase * seconds;
+      const TAU = Math.PI * 2;
+
+      let activeIdx = 0;
+      let activeCaption = "configure loop fps and palette";
+      steps.forEach((st, idx) => {
+        const len = ((st.to - st.from) % seconds + seconds) % seconds || seconds;
+        const u = ((t - st.from) % seconds + seconds) % seconds;
+        if (u < len) {
+          activeIdx = idx;
+          activeCaption = st.caption;
+        }
+      });
+
+      document.getElementById("caption-text").textContent = activeCaption;
+      for (let i = 0; i < 4; i++) {
+        document.getElementById("st-" + i).classList.toggle("active", i === activeIdx);
+        document.getElementById("nav-" + i).classList.toggle("active", i === activeIdx);
+      }
+
+      // Build seamless periodic SVG waveform
+      const pts = [];
+      for (let i = 0; i <= 40; i++) {
+        const u = i / 40;
+        const x = u * 520;
+        const y = 55 + Math.sin(TAU * (u * 2 - phase)) * 24 + Math.cos(TAU * (u * 3 + phase)) * 10;
+        pts.push((i === 0 ? "M" : "L") + x.toFixed(1) + "," + y.toFixed(1));
+      }
+      document.getElementById("wave-path").setAttribute("d", pts.join(" "));
+
+      const dotU = 0.5 + 0.38 * Math.sin(TAU * phase);
+      const dotX = dotU * 520;
+      const dotY = 55 + Math.sin(TAU * (dotU * 2 - phase)) * 24 + Math.cos(TAU * (dotU * 3 + phase)) * 10;
+      const dot = document.getElementById("wave-dot");
+      dot.setAttribute("cx", dotX.toFixed(1));
+      dot.setAttribute("cy", dotY.toFixed(1));
+
+      // Closed-loop SVG cursor lands directly on Export Loop button center during Step 4 (phase ~ 0.75)
+      const btn = document.getElementById("cta-btn");
+      const mainEl = btn.closest(".main");
+      const btnRect = btn.getBoundingClientRect();
+      const mainRect = mainEl.getBoundingClientRect();
+      const targetX = btnRect.left - mainRect.left + btnRect.width * 0.55;
+      const targetY = btnRect.top - mainRect.top + btnRect.height * 0.62;
+
+      const ang = (phase - 0.75) * TAU;
+      const cx = targetX - 180 + 180 * Math.cos(ang);
+      const cy = targetY + 42 * Math.sin(ang);
+      const cur = document.getElementById("cursor");
+      cur.style.left = cx.toFixed(1) + "px";
+      cur.style.top = cy.toFixed(1) + "px";
+
+      // Click pulse right as cursor lands on Export Loop (phase in [0.68, 0.90])
+      const clickDist = Math.abs(phase - 0.75);
+      const ripple = document.getElementById("ripple");
+      const published = phase >= 0.73 && phase <= 0.94;
+      btn.classList.toggle("published", published);
+      btn.textContent = published ? "✓ Published" : "Export Loop";
+
+      if (clickDist < 0.08) {
+        const p = 1 - clickDist / 0.08;
+        ripple.style.left = targetX.toFixed(1) + "px";
+        ripple.style.top = targetY.toFixed(1) + "px";
+        ripple.style.opacity = (0.85 * (1 - p)).toFixed(2);
+        ripple.style.transform = "translate(-50%, -50%) scale(" + (0.6 + p * 2.2).toFixed(2) + ")";
+      } else {
+        ripple.style.opacity = "0";
+      }
+
+      document.getElementById("m-seam").textContent = (1.0 + 0.03 * Math.sin(TAU * phase)).toFixed(2) + "×";
+    };
+  </script>
+</body>
+</html>

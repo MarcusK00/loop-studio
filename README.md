@@ -1,92 +1,184 @@
 <p align="center">
-  <img src="./assets/logo.svg" width="96" height="96" alt="Loop Studio Logo">
+  <img src="./assets/logo.svg" width="84" height="84" alt="Loop Studio Logo">
 </p>
 
 <h1 align="center">Loop Studio</h1>
 
 <p align="center">
-  <strong>A universal multi-agent plugin &amp; deterministic CLI that makes coding agents produce verified, seamless animations and repository showcase loops.</strong>
+  <strong>Turn real <code>git diff</code>s, CLI output, HTML/SVG diagrams, and WebGL2 shaders into verified, dual-theme dark/light README &amp; PR animations.</strong>
 </p>
 
 <p align="center">
-  <img src="./gallery/loop-studio/showcase.webp" width="800" alt="Animated showcase diagram: Loop Studio turns a one-line request into a checked, seamless 60 fps loop.">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/demos/ui-showcase-dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/demos/ui-showcase-light.webp">
+    <img alt="Loop Studio dual-theme UI showcase (adapts automatically to GitHub dark and light mode)" src="./assets/demos/ui-showcase-dark.webp" width="800">
+  </picture>
 </p>
 
 <p align="center">
-  <em>Above: <code>gallery/loop-studio/showcase.webp</code> — an 8-second, 480-frame <strong>60 fps</strong> showcase loop rendered directly by the <code>loop</code> CLI (`seamScore: 1.083`, `duplicateFrames: 0`, `PASS`).</em>
+  <em>Switch GitHub between Dark and Light mode to watch every <code>&lt;picture&gt;</code> embed below adapt automatically — rendered from plain HTML/CSS/SVG (<a href="./examples/ui-showcase"><code>examples/ui-showcase</code></a>), 240 frames @ 24 fps, <code>seamScore: 1.04</code>, <code>699 KB</code> dark / <code>752 KB</code> light.</em>
 </p>
 
 ---
 
-## Gallery
+## Why Loop Studio?
 
-Every animation below is pure deterministic code (`sketch.js`), measured by `loop audit`, and committed with its exact `showcase.json` or `brief.json`, contact sheet (`sheet.png`), storyboard (`storyboard.png`), and `seam.json`. Pick any folder in [`gallery/`](./gallery), change one number, and re-render (including `30–60 fps` Animated WebP & MP4).
+GitHub READMEs and PR descriptions strip JavaScript, CSS animations, and Lottie embeds—only animated images (`WebP` / `GIF`) or uploaded `<video>` work. Existing alternatives each break down in predictable ways:
 
-### Showcase Loops (What a Repository Does)
+| Capability | **Loop Studio (`v2.0`)** | **Generative Video (Veo / Sora)** | **Remotion / Motion Canvas** | **Raw Playwright / VHS Capture** |
+| :--- | :--- | :--- | :--- | :--- |
+| **Crisp code, CLI & UI typography** | **Real browser DOM + SVG + WebGL2** | Garbles code & UI labels | React DOM | Browser / terminal capture |
+| **Generate directly from `git diff` or CLI cmd** | **`loop diff` & `loop term` (1 command)** | No | Manual React authoring | Manual tape / script |
+| **Zero `npm install` in non-JS repos** | **Yes** (Node 18+ + macOS WebKit / Chrome CDP) | API / cloud | 300 MB+ React bundler | Go/ttyd/Playwright setup |
+| **Frame-exact loop seam (`phase ∈ [0,1)`)** | **Frozen clocks + synchronous phase step** | Temporal flicker / jump | Manual frame math | Wall-clock jitter & dropped frames |
+| **Dark + Light GitHub `<picture>` themes** | **1 flag (`--themes dark,light`)** + auto contrast | Single raster video | Duplicate setups | Single colorscheme |
+| **Verifies WCAG contrast, 400px width & doc drift** | **Built-in `loop audit` CI gate** | None | None | None |
 
-| Preview | Subject, Scene Pack & Real Use Case | Seam & Audit | Artifacts |
-| :--- | :--- | :--- | :--- |
-| <img src="./gallery/loop-studio/showcase.webp" width="380" alt="Loop Studio Flow Showcase"> | **Loop Studio Pipeline** (`scenes/flow` · `studio-dark`)<br>**Use case**: README hero diagram explaining an end-to-end tool or compiler pipeline.<br><em>"Loop Studio turns a one-line request into a checked, seamless loop."</em> | `8s · 60fps · 480f` (WebP)<br>`seamScore: 1.083` (`PASS`) | [showcase.webp](./gallery/loop-studio/showcase.webp) · [showcase.gif](./gallery/loop-studio/showcase.gif) · [sketch.js](./gallery/loop-studio/sketch.js) · [storyboard.png](./gallery/loop-studio/storyboard.png) |
-| <img src="./gallery/cli-audit-session/showcase.gif" width="380" alt="Loop CLI Terminal Showcase"> | **Loop CLI Audit Session** (`scenes/terminal` · `phosphor`)<br>**Use case**: CLI documentation showing real flags, terminal telemetry, and pass/fail checks.<br><em>"The loop CLI audits any sketch for seam jumps, caption legibility, and source citations."</em> | `10s · 16fps`<br>`seamScore: 0.989` (`PASS`) | [showcase.json](./gallery/cli-audit-session/showcase.json) · [sketch.js](./gallery/cli-audit-session/sketch.js) · [storyboard.png](./gallery/cli-audit-session/storyboard.png) · [audit.json](./gallery/cli-audit-session/audit.json) |
-| <img src="./gallery/api-pipeline-code/showcase.gif" width="380" alt="Phase Contract SDK Code Showcase"> | **Phase Contract SDK** (`scenes/code` · `studio-dark`)<br>**Use case**: Library & SDK docs pairing live-stepping code lines with a synchronized state monitor.<br><em>"Every Loop Studio sketch exports meta and a pure render(ctx, phase) function."</em> | `10s · 20fps`<br>`seamScore: 1.006` (`PASS`) | [showcase.json](./gallery/api-pipeline-code/showcase.json) · [sketch.js](./gallery/api-pipeline-code/sketch.js) · [storyboard.png](./gallery/api-pipeline-code/storyboard.png) · [audit.json](./gallery/api-pipeline-code/audit.json) |
-| <img src="./gallery/mcp-mesh-topology/showcase.gif" width="380" alt="Agent Orchestrator Architecture Showcase"> | **Agent Orchestrator Mesh** (`scenes/architecture` · `aurora`)<br>**Use case**: System architecture & multi-agent / MCP service topology diagrams for RFCs & READMEs.<br><em>"The Loop Studio orchestrator coordinates the CLI renderer, seam analyzer, and cold-read subagent."</em> | `10s · 20fps`<br>`seamScore: 0.985` (`PASS`) | [showcase.json](./gallery/mcp-mesh-topology/showcase.json) · [sketch.js](./gallery/mcp-mesh-topology/sketch.js) · [storyboard.png](./gallery/mcp-mesh-topology/storyboard.png) · [audit.json](./gallery/mcp-mesh-topology/audit.json) |
-| <img src="./gallery/git-pr-guardrails/showcase.webp" width="380" alt="Protected Git Workflow 60fps Showcase"> | **Protected Git Workflow** (`60 fps` WebP · `studio-dark`)<br>**Use case**: CI/CD & branch-protection explainer animating `feat/*` -> `PR + CI` -> `dev` -> `main`.<br><em>"Branch guardrails block direct pushes and require passing CI evals before merging."</em> | `8s · 60fps · 480f`<br>`seamScore: 1.148` (`PASS`) | [showcase.webp](./gallery/git-pr-guardrails/showcase.webp) · [sketch.js](./gallery/git-pr-guardrails/sketch.js) · [storyboard.png](./gallery/git-pr-guardrails/storyboard.png) · [audit.json](./gallery/git-pr-guardrails/audit.json) |
-| <img src="./gallery/json-to-gif-transform/showcase.webp" width="380" alt="60fps Video Transformer Showcase"> | **60 fps Video Transformer** (`60 fps` WebP · `abyss`)<br>**Use case**: Compiler, build pipeline, or media-processing diagram converting specs into `480` frames.<br><em>"Converts brief.json into 480 phase-exact frames and encodes MP4 & WebP."</em> | `8s · 60fps · 480f`<br>`seamScore: 1.005` (`PASS`) | [showcase.webp](./gallery/json-to-gif-transform/showcase.webp) · [sketch.js](./gallery/json-to-gif-transform/sketch.js) · [storyboard.png](./gallery/json-to-gif-transform/storyboard.png) · [audit.json](./gallery/json-to-gif-transform/audit.json) |
+---
 
-### Ambient Loops (Mood, Backgrounds, 30–60 fps UI & Social Motion)
+## Where Loop Studio Shines
 
-| Preview | Style Pack & Real Use Case | Specs & Seam Score | Artifacts |
-| :--- | :--- | :--- | :--- |
-| <img src="./gallery/deep-sea-orbits/loop.gif" width="220" alt="Abyssal Bioluminescence"> | **`styles/particle-orbit`** (`abyss`)<br>**Use case**: Calm dark-mode app background, stream overlay, or loading state.<br><em>"Deep sea, slow, bioluminescent particle orbits."</em> | `4s · 20fps · 320×320`<br>`seamScore: 0.972` (`PASS`) | [brief.json](./gallery/deep-sea-orbits/brief.json) · [sketch.js](./gallery/deep-sea-orbits/sketch.js) · [sheet.png](./gallery/deep-sea-orbits/sheet.png) · [seam.json](./gallery/deep-sea-orbits/seam.json) |
-| <img src="./gallery/aurora-flow-field/loop.gif" width="220" alt="Arctic Currents Flow Field"> | **`styles/flow-field`** (`aurora`)<br>**Use case**: Organic generative header for landing pages and music visualizers.<br><em>"Drifting aurora currents, organic silk streamlines."</em> | `4s · 20fps · 320×320`<br>`seamScore: 1.037` (`PASS`) | [brief.json](./gallery/aurora-flow-field/brief.json) · [sketch.js](./gallery/aurora-flow-field/sketch.js) · [sheet.png](./gallery/aurora-flow-field/sheet.png) · [seam.json](./gallery/aurora-flow-field/seam.json) |
-| <img src="./gallery/nordic-isometric/loop.gif" width="220" alt="Harmonic Architecture Isometric Grid"> | **`styles/isometric-grid`** (`nordic`)<br>**Use case**: Cloud platform, cluster orchestration, or modular infrastructure tile.<br><em>"Architectural blocks on an isometric grid rising in waves."</em> | `4s · 20fps · 320×320`<br>`seamScore: 0.927` (`PASS`) | [brief.json](./gallery/nordic-isometric/brief.json) · [sketch.js](./gallery/nordic-isometric/sketch.js) · [sheet.png](./gallery/nordic-isometric/sheet.png) · [seam.json](./gallery/nordic-isometric/seam.json) |
-| <img src="./gallery/cad-planetary/loop.gif" width="220" alt="Epicyclic Telemetry Blueprint CAD"> | **`styles/blueprint-cad`** (`blueprint`)<br>**Use case**: Robotics, hardware, CAD, and precision engineering project badges.<br><em>"Planetary gear linkages rotating at 1x and -2x harmonic speeds."</em> | `4s · 20fps · 320×320`<br>`seamScore: 1.023` (`PASS`) | [brief.json](./gallery/cad-planetary/brief.json) · [sketch.js](./gallery/cad-planetary/sketch.js) · [sheet.png](./gallery/cad-planetary/sheet.png) · [seam.json](./gallery/cad-planetary/seam.json) |
-| <img src="./gallery/readme-hero-3d/loop.webp" width="220" alt="Nebula 3D Raymarched Sculpture"> | **`styles/sdf-raymarch`** (`nebula`)<br>**Use case**: Zero-dependency 3D product hero & smooth WebP/MP4 shader sculpture.<br><em>"30 fps 3D raymarched smooth-union torus and orbiting spheres."</em> | `3s · 30fps · 280×280` (WebP)<br>`seamScore: 1.061` (`PASS`) | [loop.webp](./gallery/readme-hero-3d/loop.webp) · [loop.gif](./gallery/readme-hero-3d/loop.gif) · [sketch.js](./gallery/readme-hero-3d/sketch.js) · [sheet.png](./gallery/readme-hero-3d/sheet.png) |
-| <img src="./gallery/retro-crt-loader/loop.gif" width="220" alt="Amber CRT Bayer Dither Radar"> | **`styles/dither-mono`** (`amber-crt`)<br>**Use case**: Low-bandwidth CLI/game splash screen & zero-shimmer retro loader.<br><em>"30 fps amber CRT sphere and radar sweep via ordered 4×4 Bayer dithering."</em> | `3s · 30fps · 280×280`<br>`seamScore: 1.005` (`PASS`) | [loop.gif](./gallery/retro-crt-loader/loop.gif) · [loop.webp](./gallery/retro-crt-loader/loop.webp) · [sketch.js](./gallery/retro-crt-loader/sketch.js) · [sheet.png](./gallery/retro-crt-loader/sheet.png) |
-| <img src="./gallery/kinetic-release-banner/loop.webp" width="220" alt="60 fps Editorial Kinetic Wave"> | **`styles/kinetic-type`** (`editorial`)<br>**Use case**: Silky **60 fps** social release announcement card & talk title slide.<br><em>"60 fps 4-second editorial kinetic typography wave with WCAG-verified focal pill."</em> | `4s · 60fps · 240f` (WebP)<br>`seamScore: 0.968` (`PASS`) | [loop.webp](./gallery/kinetic-release-banner/loop.webp) · [loop.gif](./gallery/kinetic-release-banner/loop.gif) · [sketch.js](./gallery/kinetic-release-banner/sketch.js) · [sheet.png](./gallery/kinetic-release-banner/sheet.png) |
-| <img src="./gallery/sonar-bathymetry/loop.gif" width="220" alt="Abyssal Bathymetry Topographic Isolines"> | **`styles/topographic-contour`** (`abyss`)<br>**Use case**: Geospatial, weather, sonar, and telemetry elevation backgrounds.<br><em>"30 fps bathymetric contour isolines over a cyclic scalar noise field."</em> | `3s · 30fps · 280×280`<br>`seamScore: 0.951` (`PASS`) | [loop.gif](./gallery/sonar-bathymetry/loop.gif) · [loop.webp](./gallery/sonar-bathymetry/loop.webp) · [sketch.js](./gallery/sonar-bathymetry/sketch.js) · [sheet.png](./gallery/sonar-bathymetry/sheet.png) |
-| <img src="./gallery/live-audio-spectrum/loop.webp" width="220" alt="120 BPM 60fps Audio Spectrum"> | **`120 BPM Harmonic Spectrum`** (`ember`)<br>**Use case**: Music release visual, podcast player, & WebAudio/VST visualizer (3 bars of 4/4).<br><em>"6-second 60 fps 120 BPM harmonic equalizer with macro swell and oscilloscope."</em> | `6s · 60fps · 360f` (WebP)<br>`seamScore: 1.05` (`PASS`) | [loop.webp](./gallery/live-audio-spectrum/loop.webp) · [loop.gif](./gallery/live-audio-spectrum/loop.gif) · [sketch.js](./gallery/live-audio-spectrum/sketch.js) · [sheet.png](./gallery/live-audio-spectrum/sheet.png) |
-| <img src="./gallery/orbital-telemetry-watch/loop.webp" width="220" alt="8s 60fps Orbital Radar Telemetry"> | **`Orbital Radar Telemetry`** (`blueprint`)<br>**Use case**: Aerospace HUD, satellite tracker, & DevOps live observability splash.<br><em>"8-second 60 fps radar sweep tracking 3 satellites on tilted elliptical orbits."</em> | `8s · 60fps · 480f` (WebP)<br>`seamScore: 1.037` (`PASS`) | [loop.webp](./gallery/orbital-telemetry-watch/loop.webp) · [loop.gif](./gallery/orbital-telemetry-watch/loop.gif) · [sketch.js](./gallery/orbital-telemetry-watch/sketch.js) · [sheet.png](./gallery/orbital-telemetry-watch/sheet.png) |
+### 1. Real `git diff` -> Dual-Theme PR Code Diffs (`loop diff`)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/demos/code-diff-dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/demos/code-diff-light.webp">
+    <img alt="Code Diff Refactor Showcase (adapts automatically to GitHub dark and light mode)" src="./assets/demos/code-diff-dark.webp" width="800">
+  </picture>
+</p>
+
+Turn any branch diff, staged change, or `.patch` file into a syntax-highlighted, dark+light PR or migration visual—automatically grounded to the real changed `file:line` range and `"match"` symbol:
+
+```bash
+node ./tool/bin/loop.js diff ./pr-demo --range dev..HEAD
+node ./tool/bin/loop.js audit ./pr-demo --repo . --themes dark,light
+node ./tool/bin/loop.js render ./pr-demo --themes dark,light --formats webp,png --max-kb 1024
+```
+
+*Shown: [`examples/code-diff`](./examples/code-diff) · `854 KB` dark / `906 KB` light · `seamScore: 0.472`.*
+
+---
+
+### 2. Real CLI Output -> Dual-Theme Terminal Sessions (`loop term`)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/demos/cli-terminal-dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/demos/cli-terminal-light.webp">
+    <img alt="Loop CLI Audit Terminal Showcase (adapts automatically to GitHub dark and light mode)" src="./assets/demos/cli-terminal-dark.webp" width="800">
+  </picture>
+</p>
+
+Capture real command stdout and exit status into a crisp dark/light terminal animation—no `ttyd`, Go runtime, or hand-recorded QuickTime screencasts:
+
+```bash
+node ./tool/bin/loop.js term ./cli-demo --cmd "npm test" --label "npm test"
+node ./tool/bin/loop.js render ./cli-demo --themes dark,light --formats webp
+```
+
+*Shown: [`examples/cli-terminal`](./examples/cli-terminal) · `778 KB` dark / `863 KB` light · `seamScore: 0.472`.*
+
+---
+
+### 3. Animated SVG System Architecture & Dataflow Diagrams
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/demos/architecture-flow-dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/demos/architecture-flow-light.webp">
+    <img alt="Animated SVG System Architecture Flow (adapts automatically to GitHub dark and light mode)" src="./assets/demos/architecture-flow-dark.webp" width="800">
+  </picture>
+</p>
+
+Replace static Mermaid boxes or broken dark-mode PNGs with animated SVG bezier topologies whose steps are tied directly to real implementation files via `file:line` + `"match"` checks:
+
+*Shown: [`examples/architecture-flow`](./examples/architecture-flow) · `640 KB` dark / `688 KB` light · `seamScore: 1.073`, `flickerScore: 0.109`.*
+
+---
+
+### 4. Quantitative Benchmark & Payload Comparisons
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/demos/benchmark-compare-dark.webp">
+    <source media="(prefers-color-scheme: light)" srcset="./assets/demos/benchmark-compare-light.webp">
+    <img alt="README Asset Payload Benchmark Comparison (adapts automatically to GitHub dark and light mode)" src="./assets/demos/benchmark-compare-dark.webp" width="800">
+  </picture>
+</p>
+
+Ship clean, readable performance and bundle-size charts that animate smoothly across both GitHub themes and stay WCAG AA (`>= 4.5:1`) accessible at `400px` mobile width:
+
+*Shown: [`examples/benchmark-compare`](./examples/benchmark-compare) · `529 KB` dark / `542 KB` light · `seamScore: 0.443`.*
+
+---
+
+### 5. Zero-Dependency WebGL2 Shaders
+
+<table>
+  <tr>
+    <td width="340" align="center">
+      <img src="./assets/demos/shader-hero.webp" width="280" alt="WebGL2 GLSL Iridescent 3D SDF Torus">
+    </td>
+    <td>
+      <strong><a href="./examples/shader-hero"><code>examples/shader-hero</code></a> (WebGL2 GLSL · <code>761 KB</code> · <code>30 fps</code>)</strong><br><br>
+      Drop any <code>shader.frag</code> using <code>uniform float u_phase</code> and Loop Studio compiles, steps <code>0..N-1</code> on the GPU via macOS WebKit or Headless Chrome, verifies <code>seamScore: 0.951</code>, and encodes Animated WebP or 60 fps MP4—zero Vite, Three.js, or bundler setup.<br><br>
+      <ul>
+        <li><code>--loop-on-accent</code> &amp; <code>--loop-on-spark</code> automatically pick dark or light ink so CTA buttons stay WCAG <code>&gt;= 4.5:1</code> in both themes.</li>
+        <li><code>loop legible</code> probes real rendered DOM bounding boxes, <code>scrollWidth</code> overflow, and <code>400px</code> mobile legibility.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+---
+
+### 6. Source-Drift Detection & Universal External Video CI Gate
+
+README visuals silently rot when code changes. Every step in `showcase.json` cites a repo-relative `file:line` range plus optional `"match"` tokens checked within ±3 lines:
+
+```json
+{
+  "from": 8.0,
+  "to": 3.0,
+  "caption": "detect clock drift and random jitter",
+  "source": "tool/lib/harness.js:82-88",
+  "match": ["FIXED_EPOCH", "Math.random"]
+}
+```
+
+If someone refactors `FIXED_EPOCH` out of `tool/lib/harness.js`, `loop audit` fails CI immediately. Pair with `loop story` + [`loop-cold-reader`](./agents/loop-cold-reader.md) (inspecting **only** `storyboard.png` with zero repo context) to verify a first-time visitor understands the diagram.
+
+Already rendering videos in **Remotion, Motion Canvas, Playwright, or After Effects**? Point `loop seam` or `loop audit` at **any** `.mp4`, `.gif`, `.webp`, or `.webm` (decoded via `ffmpeg` when installed):
+
+```bash
+node ./tool/bin/loop.js seam ./hero.mp4
+node ./tool/bin/loop.js audit ./hero.webp --showcase ./showcase.json --repo . --max-kb 2048
+```
 
 ---
 
 ## Install
 
-Loop Studio ships as a **Universal Multi-Agent Plugin** supporting **Antigravity**, **Claude Code**, **Gemini CLI**, and any agent that reads `SKILL.md` and `AGENTS.md`, backed by a zero-dependency Node.js CLI (`loop`).
+Requires **Node.js 18+** (zero external npm packages; renders natively via macOS WebKit or Chrome/Chromium CDP; optional `ffmpeg` only for WebM export and external video auditing):
 
-### 1. Antigravity
-
-Install globally for all workspaces:
-
+### Antigravity / Claude Code / Gemini CLI
 ```bash
-git clone https://github.com/Marcusk00/loop-studio.git ~/.gemini/config/plugins/loop-studio
-```
+# Antigravity (global plugin)
+git clone https://github.com/MarcusK00/loop-studio.git ~/.gemini/config/plugins/loop-studio
 
-Or add to a specific project workspace:
-
-```bash
-git clone https://github.com/Marcusk00/loop-studio.git .agents/plugins/loop-studio
-```
-
-### 2. Claude Code
-
-```bash
+# Claude Code
 /plugin marketplace add Marcusk00/loop-studio
 /plugin install loop-studio@loop-studio-marketplace
-```
 
-### 3. Gemini CLI
-
-```bash
+# Gemini CLI
 gemini extensions install https://github.com/Marcusk00/loop-studio
 ```
 
-### 4. Standalone CLI (`loop`)
-
-Requires only **Node.js 18+** (zero external npm packages required; includes a built-in deterministic 2D software canvas, PNG encoder, and adaptive 256-color LZW GIF89a encoder, plus optional FFmpeg / Headless Chrome acceleration):
-
+### Standalone CLI
 ```bash
-git clone https://github.com/Marcusk00/loop-studio.git
+git clone https://github.com/MarcusK00/loop-studio.git
 cd loop-studio
 node ./tool/bin/loop.js doctor
 npm test
@@ -94,112 +186,44 @@ npm test
 
 ---
 
-## The One Rule: Everything Comes From `phase`
+## Quick Start
 
-Coding agents can already write a canvas sketch. What they get wrong without help is the craft around it: making the last frame meet the first without a jump, composing visual hierarchy, keeping captions readable on phones, and verifying the output file.
+```bash
+# Generate from a real git diff, real CLI command, or clean HTML/GLSL starter
+node ./tool/bin/loop.js diff ./docs/demo --range dev..HEAD
+node ./tool/bin/loop.js term ./docs/demo --cmd "npm test" --label "npm test"
+node ./tool/bin/loop.js new ./docs/demo --template html
 
-Every sketch in Loop Studio meets a single mathematical contract:
+# Build storyboard.png for a zero-context cold read
+node ./tool/bin/loop.js story ./docs/demo
 
-```js
-// sketch.js — the only contract a loop has to meet
-export const meta = { seconds: 4, fps: 30, width: 1080, height: 1080, seed: 7, palette: "abyss" };
+# Audit seam, dual-theme WCAG contrast, mobile 400px layout, and source drift
+node ./tool/bin/loop.js audit ./docs/demo --repo . --themes dark,light
 
-export function render(ctx, phase, kit) {
-  // phase runs in [0, 1) where phase = frame / (meta.seconds * meta.fps)
-  // phase = 1.0 is the exact same picture as phase = 0.0 and is NEVER rendered.
-  const turn = phase * kit.TAU;
-}
+# Export dark/light WebP + PNG poster + copy-paste <picture> README snippet
+node ./tool/bin/loop.js render ./docs/demo --themes dark,light --formats webp,png --max-kb 2048
 ```
 
-- **No clocks, no unseeded randomness**: `Date.now()` and `Math.random()` are forbidden. Every frame is a pure function of `(phase, meta, kit)`.
-- **Frame `N` is never rendered**: A 120-frame loop renders frames `0..119` at `phase = f / 120`. Rendering frame `120` (`phase = 1.0`) duplicates frame `0` and causes a visible 1-frame stutter at the wrap point.
-- **Whole cycles, circular noise, and overlapping generations**: Provided out-of-the-box by [`tool/lib/loop-kit.js`](./tool/lib/loop-kit.js) (`kit.sin`, `kit.loopNoise`, `kit.generations`, `kit.window`).
-
 ---
 
-## Two Workflows: Showcase Loops & Ambient Loops
-
-### 1. Showcase Loops ("Animate what this repo does")
-
-Ask your agent:
-> *"Make me a 10-second video that loops smoothly about this repo and what it does."*
-
-The agent follows [`loop-showcase`](./skills/loop-showcase/SKILL.md):
-1. **Reads the repo** (`README.md`, manifest, `examples/`, `tests/`) and states in one plain sentence what goes in, what happens to it, and what comes out.
-2. **Writes `showcase.json`** with a stationary stage, wrap-point handover (`from: 8.5, to: 1.5`), and a mandatory `"source": "file:line"` citation for every step.
-3. **Renders `storyboard.png`** (`loop story`) showing Frame `0` plus the midpoint of each step.
-4. **Runs a Zero-Context Cold Read** ([`loop-cold-read`](./skills/loop-cold-read/SKILL.md)): hands *only* `storyboard.png` to the [`loop-cold-reader`](./agents/loop-cold-reader.md) subagent. If the unprimed subagent cannot tell what the project does, the diagram is revised.
-5. **Runs `loop audit`**: verifies `seamScore <= 1.5`, `duplicateFrames === 0`, caption reading time `>= 0.5 + 0.3 * words`, WCAG AA contrast `>= 4.5:1`, mobile `400px` legibility, and `100%` valid `file:line` citations before rendering `showcase.gif` and `poster.png`.
-
-### 2. Ambient Loops ("Make a 4-second deep sea bioluminescent loop")
-
-Ask your agent:
-> *"Make a 4-second square loop. Deep sea, slow, bioluminescent."*
-
-The agent follows [`loop-studio`](./skills/loop-studio/SKILL.md):
-1. Translates the mood into `brief.json` ([`loop-brief`](./skills/loop-brief/SKILL.md)) and loads the matching style pack ([`styles/particle-orbit`](./skills/styles/particle-orbit/SKILL.md)).
-2. Writes `sketch.js` with three depth layers moving at integer harmonic ratios ([`loop-compose`](./skills/loop-compose/SKILL.md), [`loop-math`](./skills/loop-math/SKILL.md), [`loop-palette`](./skills/loop-palette/SKILL.md)).
-3. Renders a numbered contact sheet (`loop sheet -> sheet.png`) and critiques focal point, speed contrast, and spatial balance ([`loop-critique`](./skills/loop-critique/SKILL.md)).
-4. Measures the wrap seam (`loop seam -> seam.json`) and iterates for at most **3 rounds** before rendering `loop.gif` and `poster.png`.
-
----
-
-## Repository Contents
+## Repository Layout
 
 ```text
 loop-studio/
-├─ plugin.json                 # Antigravity plugin manifest
-├─ .claude-plugin/             # Claude Code plugin & marketplace manifests
-├─ gemini-extension.json       # Gemini CLI extension manifest
-├─ AGENTS.md / CLAUDE.md       # Top-level agent instructions & command routing
-├─ rules/
-│  └─ AGENTS.md                # Always-on plugin invariants (Phase Contract & 3-Round Gate)
-├─ agents/
-│  ├─ loop-cold-reader.md      # Zero-context storyboard evaluator subagent
-│  ├─ loop-critic.md           # Contact sheet & motion design critic subagent
-│  └─ loop-choreographer.md    # Repo-to-showcase.json researcher subagent
+├─ AGENTS.md / CLAUDE.md       # Agent instructions & CLI routing
+├─ rules/AGENTS.md             # Phase Contract & verification invariants
+├─ agents/loop-cold-reader.md  # Zero-context storyboard evaluator subagent
 ├─ skills/
-│  ├─ loop-studio/             # Entry skill & session orchestrator
-│  ├─ loop-brief/              # Prompt -> brief.json specification generator
-│  ├─ loop-math/               # Whole cycles, circular noise, overlapping generations
-│  ├─ loop-compose/            # Focal anchor, 3-depth layers, easing, negative space
-│  ├─ loop-palette/            # 12 semantic palettes, GIF quantization & Bayer dithering
-│  ├─ loop-critique/           # Contact sheet diagnostic protocol & 3-round cap
-│  ├─ loop-render/             # CLI execution & destination size budgets
-│  ├─ loop-showcase/           # Repo reading protocol & sourced showcase.json authoring
-│  ├─ loop-timeline/           # Stationary stage & wrap-point handover choreography
-│  ├─ loop-type/               # Reading-time formula, WCAG 4.5:1 contrast & 400px phone rules
-│  ├─ loop-cold-read/          # Fresh-agent storyboard comprehension test
-│  ├─ loop-audit/              # Unified seam + legibility + source verification gate
-│  ├─ loop-embed/              # Responsive dark/light <picture> & video README embeds
-│  ├─ loop-new-style/          # Contributor guide for adding new style & scene packs
-│  ├─ loop-scenes/             # Selector index for the 8 Showcase Scene Packs
-│  ├─ loop-styles/             # Selector index for the 8 Ambient Style Packs
-│  ├─ scenes/                  # 8 Showcase Scene Packs (SKILL.md + template.js)
-│  │  ├─ flow/                 # Stage boxes on a horizontal transport rail
-│  │  ├─ transform/            # Split before-and-after transformation core
-│  │  ├─ terminal/             # Deterministic vector CLI session
-│  │  ├─ code/                 # Stepping code snippet + live phase inspector
-│  │  ├─ interface/            # Wireframe UI screen with closed-loop pointer
-│  │  ├─ structure/            # Hierarchical tree / DAG signal propagation
-│  │  ├─ architecture/         # Multi-tier system topology with request/response packets
-│  │  └─ benchmark/            # Side-by-side quantitative seam / metric comparison
-│  └─ styles/                  # 8 Ambient Style Packs (SKILL.md + template.js)
-│     ├─ flow-field/           # Circular curl-noise streamlines across 3 generations
-│     ├─ particle-orbit/       # Nested elliptical & bioluminescent harmonic orbits
-│     ├─ sdf-raymarch/         # Software-safe 3D Signed Distance Field smooth union
-│     ├─ kinetic-type/         # Harmonic wave typography poster
-│     ├─ dither-mono/          # Ordered Bayer 4×4 / 8×8 retro CRT stippling
-│     ├─ isometric-grid/       # Orthographic 3D blocks rising in harmonic waves
-│     ├─ blueprint-cad/        # Technical CAD schematic with epicyclic gear linkages
-│     └─ topographic-contour/  # Marching isolines over a cyclic 3D phase-noise field
-├─ tool/                       # The `loop` CLI & deterministic rendering/analysis engine
-│  ├─ bin/loop.js
-│  ├─ lib/                     # loop-kit, soft-canvas, encoders, analyzers, compositor, server
-│  ├─ scripts/build-gallery.js
-│  └─ test/run-evals.js
-├─ gallery/                    # 16 reproducible showcase & ambient loops (up to 60 fps) with full artifacts
-├─ evals/                      # Automated positive & negative verification gates
+│  ├─ loop-studio/SKILL.md     # Dual-theme HTML/WebGL2 README & PR motion workflow
+│  └─ loop-audit/SKILL.md      # Project & external video seam/contrast/drift audit
+├─ examples/                   # 6 source-only examples (ui-showcase, code-diff, cli-terminal, architecture-flow, benchmark-compare, shader-hero)
+├─ assets/demos/               # Dual-theme README WebP demos
+├─ tool/
+│  ├─ bin/loop.js              # `loop` CLI
+│  ├─ lib/                     # generators (diff/term), harness, webkit/chromium backends, analyzers, encoders, server
+│  ├─ scripts/                 # macOS WKWebView & AVFoundation Swift runners
+│  ├─ templates/               # `loop new` starters (html, code-diff, shader)
+│  └─ test/run-evals.js        # Core, negative-gate & browser integration test suite
 └─ docs/                       # Phase contract, CLI manual, and renderer ADR
 ```
 
@@ -207,18 +231,20 @@ loop-studio/
 
 ## CLI Reference (`loop`)
 
-| Command | Description | Writes |
-| :--- | :--- | :--- |
-| `loop new <dir> [--mode showcase\|ambient] [--scene <id>] [--style <id>] [--palette <id>]` | Scaffold a new loop folder from any scene or style template | `sketch.js`, `showcase.json` / `brief.json`, `index.html` |
-| `loop sheet <dir> [--every 8] [--cols 4]` | Render every Nth frame into a numbered contact sheet | `sheet.png` |
-| `loop story <dir>` | Render Frame `0` + midpoint of each showcase step for cold reading | `storyboard.png` |
-| `loop seam <dir>` | Measure frame-to-frame RMS deltas, wrap seam score, duplicates, and flicker | `seam.json` |
-| `loop legible <dir>` | Verify reading duration (`>= 0.5 + 0.3*words`), WCAG `4.5:1` contrast & phone margins | `legible.json` |
-| `loop source-check <dir> [--repo <root>]` | Verify every `file:line` source citation in `showcase.json` exists | `sources.json` |
-| `loop audit <dir> [--repo <root>]` | Run `seam`, `legible`, and `source-check` together as a single gate | `audit.json` |
-| `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png\|all]` | Render full-resolution `showcase.gif` / `loop.gif`, `poster.png`, `loop.mp4` (`30–120 fps` via FFmpeg or macOS AVFoundation), Animated `.webp`, and `.webm` | `loop.gif`, `loop.mp4`, `poster.png`, `seam.json` |
-| `loop serve <dir> [--port 4173]` | Launch interactive browser workbench with phase scrubber & 400px phone view | `http://localhost:4173` |
-| `loop doctor` | Check runtime engines (SoftCanvas2D, GIF89a, PNG, macOS AVFoundation, Animated WebP, FFmpeg, Chrome) | JSON diagnostic |
+| Command | Description |
+| :--- | :--- |
+| `loop diff <dir> [--range <a..b> \| --staged \| --file <patch>]` | Generate a dual-theme syntax-highlighted PR code-diff scene from real `git diff` output |
+| `loop term <dir> --cmd "<command>" [--label "<text>"] [--output "<lines>"]` | Capture real CLI output into a dual-theme animated terminal showcase |
+| `loop new <dir> [--template html\|code-diff\|shader]` | Scaffold `scene.html` or `shader.frag`, `showcase.json` or `brief.json`, and `index.html` |
+| `loop sheet <dir> [--every 8] [--cols 4]` | Render every Nth frame into a numbered contact sheet (`sheet.png`) |
+| `loop story <dir>` | Render Frame `0` + step midpoints into `storyboard.png` |
+| `loop seam <dir\|video> [--lossy]` | Measure wrap-seam RMS delta, duplicate frames, and flicker on a project or external video |
+| `loop legible <dir> [--themes dark,light]` | Verify stage labels, reading time, DOM overflow, `400px` sizing, and `4.5:1` WCAG contrast |
+| `loop source-check <dir\|showcase.json> [--repo .]` | Verify repo-relative `file:line` citations and `"match"` doc-drift tokens |
+| `loop audit <dir\|video> [--repo .] [--themes dark,light] [--max-kb <n>]` | Unified verification gate (`0` pass, `1` fail, `2` missing runtime / invalid input) |
+| `loop render <dir> [--themes dark,light] [--formats webp,gif,mp4,webm,png] [--max-kb <n>]` | Export WebP, GIF, MP4, WebM, PNG, and GitHub `<picture>` embeds |
+| `loop serve <dir> [--port 4173]` | Interactive browser workbench with phase scrubber, theme toggle, and `400px` mobile toggle |
+| `loop doctor` | Inspect available browser engines and encoders/decoders |
 
 ---
 
