@@ -8,14 +8,14 @@ Use the `loop` CLI (`npx loop` or `node tool/bin/loop.js`) for every stage of th
 
 | Command | Purpose | Output |
 | :--- | :--- | :--- |
-| `loop new <dir> [--mode showcase\|ambient] [--style <id>] [--scene <id>]` | Scaffold a loop project with `brief.json` / `showcase.json`, `sketch.js`, and preview HTML | `<dir>/sketch.js`, `<dir>/index.html` |
+| `loop new <dir> [--mode showcase\|ambient] [--style <id>] [--scene <id>] [--fps <n>]` | Scaffold a loop project with `brief.json` / `showcase.json`, `sketch.js`, and preview HTML | `<dir>/sketch.js`, `<dir>/index.html` |
 | `loop sheet <dir> [--cols 4] [--every 8]` | Render every Nth frame into a numbered contact sheet for visual critique | `<dir>/sheet.png` |
 | `loop story <dir>` | Render Frame `0` plus the midpoint frame of each step in `showcase.json` | `<dir>/storyboard.png` |
 | `loop seam <dir>` | Measure frame-to-frame pixel deltas, last-to-first seam ratio, duplicate frames, and flicker | `<dir>/seam.json` |
 | `loop legible <dir>` | Audit caption reading time, WCAG contrast (`>= 4.5:1`), safe margins, and phone-width readability | `<dir>/legible.json` |
 | `loop source-check <dir> [--repo <path>]` | Verify every `file:line` citation in `showcase.json` exists in the target repository | `<dir>/sources.json` |
 | `loop audit <dir>` | Run `seam`, `legible`, and `source-check` together as a unified quality gate | `<dir>/audit.json` |
-| `loop render <dir> [--formats gif,mp4,webm,png]` | Render full-resolution `loop.gif` / `showcase.gif`, `poster.png`, and (when FFmpeg is available) `loop.mp4` & `loop.webm` | `<dir>/loop.gif`, `<dir>/poster.png` |
+| `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png\|all]` | Render full-resolution `loop.gif` / `showcase.gif`, `poster.png`, `loop.mp4` (FFmpeg or macOS AVFoundation), Animated WebP, and WebM at up to `60–120 fps` | `<dir>/loop.gif`, `<dir>/loop.mp4`, `<dir>/poster.png` |
 | `loop serve <dir> [--port 4173]` | Launch interactive browser workbench with phase scrubber, seam oscilloscope, and mobile preview | `http://localhost:4173` |
 | `loop doctor` | Check runtime capabilities (Pure-JS engine, Headless Chrome/Chromium, FFmpeg) | JSON / terminal diagnostic |
 

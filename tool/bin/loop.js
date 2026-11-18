@@ -5,7 +5,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { encodePNG, encodeGIF, detectFFmpeg } from "../lib/encoders.js";
+import {
+  encodePNG,
+  encodeGIF,
+  encodeMP4,
+  encodeWebM,
+  encodeAnimatedWebP,
+  detectCapabilities
+} from "../lib/encoders.js";
 import { analyzeSeam, analyzeLegibility, analyzeSources } from "../lib/analyzers.js";
 import { renderAllFrames, renderContactSheet, renderStoryboard } from "../lib/compositor.js";
 import { generatePreviewHtml, serveLoop } from "../lib/server.js";
@@ -44,7 +51,7 @@ function readJsonIfExists(filePath) {
   }
 }
 
-async function loadSketchProject(targetDir) {
+async function loadSketchProject(targetDir, flags = {}) {
   const absDir = path.resolve(targetDir);
   const sketchPath = path.join(absDir, "sketch.js");
   if (!fs.existsSync(sketchPath)) {
@@ -54,10 +61,30 @@ async function loadSketchProject(targetDir) {
   const sketchModule = await import(pathToFileURL(sketchPath).href + cacheBust);
   const briefJson = readJsonIfExists(path.join(absDir, "brief.json"));
   const showcaseJson = readJsonIfExists(path.join(absDir, "showcase.json")) || sketchModule.showcase || null;
+
+  const showcaseOverrides = showcaseJson
+    ? {
+        ...(showcaseJson.seconds ? { seconds: showcaseJson.seconds } : {}),
+        ...(showcaseJson.fps ? { fps: showcaseJson.fps } : {}),
+        ...(showcaseJson.width ? { width: showcaseJson.width } : {}),
+        ...(showcaseJson.height ? { height: showcaseJson.height } : {}),
+        ...(showcaseJson.palette ? { palette: showcaseJson.palette } : {})
+      }
+    : {};
+
+  const flagOverrides = {
+    ...(flags.fps ? { fps: Number(flags.fps) } : {}),
+    ...(flags.seconds ? { seconds: Number(flags.seconds) } : {}),
+    ...(flags.width ? { width: Number(flags.width) } : {}),
+    ...(flags.height ? { height: Number(flags.height) } : {}),
+    ...(flags.palette ? { palette: flags.palette } : {})
+  };
+
   const meta = {
     ...(sketchModule.meta || {}),
     ...(briefJson || {}),
-    ...(showcaseJson ? { seconds: showcaseJson.seconds || sketchModule.meta?.seconds || 10 } : {})
+    ...showcaseOverrides,
+    ...flagOverrides
   };
   return { absDir, sketchPath, sketchModule, briefJson, showcaseJson, meta };
 }
@@ -95,18 +122,18 @@ function cmdNew(targetDir, flags) {
     const showcaseData = {
       title: path.basename(absDir),
       says: "Loop Studio turns a one-line request into a checked, seamless loop.",
-      seconds: 10,
-      fps: 24,
-      width: 800,
-      height: 320,
+      seconds: Number(flags.seconds || 10),
+      fps: Number(flags.fps || 30),
+      width: Number(flags.width || 800),
+      height: Number(flags.height || 360),
       palette,
       scene,
       stage: ["request", "sketch", "check", "loop.gif"],
       steps: [
-        { from: 8.5, to: 1.5, caption: "a request arrives: \"deep sea, slow, square\"", source: "README.md:12" },
-        { from: 1.5, to: 5.0, caption: "a sketch is written, driven by the phase", source: "rules/AGENTS.md:8" },
-        { from: 5.0, to: 7.0, caption: "the seam and legibility are measured", source: "skills/loop-render/SKILL.md:30" },
-        { from: 7.0, to: 8.5, caption: "the verified loop drops out", source: "skills/loop-render/SKILL.md:54" }
+        { from: 8.75, to: 1.25, caption: "a request arrives: \"deep sea, square\"", source: "docs/contract.md:3" },
+        { from: 1.25, to: 3.75, caption: "sketch is drawn from the phase", source: "docs/contract.md:14" },
+        { from: 3.75, to: 6.25, caption: "seam and legibility are measured", source: "docs/tool.md:14" },
+        { from: 6.25, to: 8.75, caption: "the verified loop drops out", source: "docs/tool.md:24" }
       ]
     };
     const scPath = path.join(absDir, "showcase.json");
@@ -121,7 +148,7 @@ function cmdNew(targetDir, flags) {
       style,
       palette,
       seconds: Number(flags.seconds || 4),
-      fps: Number(flags.fps || 24),
+      fps: Number(flags.fps || 30),
       width: Number(flags.width || 400),
       height: Number(flags.height || 400),
       seed: Number(flags.seed || 42)
@@ -137,7 +164,7 @@ function cmdNew(targetDir, flags) {
 }
 
 async function cmdSheet(targetDir, flags) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
+  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
   const every = flags.every ? Number(flags.every) : undefined;
   const cols = flags.cols ? Number(flags.cols) : 4;
   const sheetCanvas = renderContactSheet(sketchModule, { ...meta, showcase: showcaseJson, every, cols });
@@ -147,8 +174,8 @@ async function cmdSheet(targetDir, flags) {
   console.log(JSON.stringify({ status: "ok", file: outPath, width: sheetCanvas.width, height: sheetCanvas.height, bytes: pngBuf.length }, null, 2));
 }
 
-async function cmdStory(targetDir) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
+async function cmdStory(targetDir, flags) {
+  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
   const boardCanvas = renderStoryboard(sketchModule, showcaseJson, meta);
   const pngBuf = encodePNG(boardCanvas.data, boardCanvas.width, boardCanvas.height);
   const outPath = path.join(absDir, "storyboard.png");
@@ -156,9 +183,8 @@ async function cmdStory(targetDir) {
   console.log(JSON.stringify({ status: "ok", file: outPath, width: boardCanvas.width, height: boardCanvas.height, bytes: pngBuf.length }, null, 2));
 }
 
-async function cmdSeam(targetDir) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
-  // Render at evaluation resolution for fast & exact seam measurement
+async function cmdSeam(targetDir, flags) {
+  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
   const scale = meta.width > 400 ? 0.5 : 1;
   const evalW = Math.max(120, Math.round((meta.width || 400) * scale));
   const evalH = Math.max(80, Math.round((meta.height || 400) * scale));
@@ -175,8 +201,8 @@ async function cmdSeam(targetDir) {
   if (!report.pass) process.exitCode = 1;
 }
 
-async function cmdLegible(targetDir) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
+async function cmdLegible(targetDir, flags) {
+  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
   const report = analyzeLegibility(sketchModule, showcaseJson, meta);
   const outPath = path.join(absDir, "legible.json");
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2) + "\n", "utf8");
@@ -185,7 +211,7 @@ async function cmdLegible(targetDir) {
 }
 
 async function cmdSourceCheck(targetDir, flags) {
-  const { absDir, showcaseJson } = await loadSketchProject(targetDir);
+  const { absDir, showcaseJson } = await loadSketchProject(targetDir, flags);
   const repoRoot = flags.repo ? path.resolve(flags.repo) : REPO_ROOT;
   const report = analyzeSources(showcaseJson, repoRoot);
   const outPath = path.join(absDir, "sources.json");
@@ -195,7 +221,7 @@ async function cmdSourceCheck(targetDir, flags) {
 }
 
 async function cmdAudit(targetDir, flags) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
+  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
   const repoRoot = flags.repo ? path.resolve(flags.repo) : REPO_ROOT;
 
   const scale = meta.width > 400 ? 0.5 : 1;
@@ -238,30 +264,126 @@ async function cmdAudit(targetDir, flags) {
   if (!pass) process.exitCode = 1;
 }
 
-async function cmdRender(targetDir) {
-  const { absDir, sketchModule, showcaseJson, meta } = await loadSketchProject(targetDir);
+function resolveFormats(flags, caps, briefJson) {
+  if (flags.formats) {
+    const raw = String(flags.formats)
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (raw.includes("all")) {
+      const list = ["png", "gif"];
+      if (caps.macosAVFoundation || caps.ffmpeg) list.push("mp4");
+      if (caps.animatedWebP) list.push("webp");
+      if (caps.ffmpeg) list.push("webm");
+      return list;
+    }
+    return raw;
+  }
+  if (Array.isArray(briefJson?.formats) && briefJson.formats.length > 0) {
+    return briefJson.formats.map((s) => String(s).toLowerCase());
+  }
+  const defaults = ["png", "gif"];
+  if (caps.macosAVFoundation || caps.ffmpeg) defaults.push("mp4");
+  return defaults;
+}
+
+async function cmdRender(targetDir, flags) {
+  const { absDir, sketchModule, briefJson, showcaseJson, meta } = await loadSketchProject(targetDir, flags);
+  const caps = detectCapabilities();
+  const formats = resolveFormats(flags, caps, briefJson);
+
   const { frames, width, height, fps, totalFrames } = renderAllFrames(sketchModule, {
     ...meta,
     showcase: showcaseJson
   });
 
-  // 1. Poster PNG (Frame 0)
-  const posterBuf = encodePNG(frames[0], width, height);
-  const posterPath = path.join(absDir, "poster.png");
-  fs.writeFileSync(posterPath, posterBuf);
-
-  // 2. Animated GIF89a
-  const gifBuf = encodeGIF(frames, width, height, fps);
   const isShowcase = meta.mode === "showcase" || Boolean(showcaseJson);
-  const primaryGifName = isShowcase ? "showcase.gif" : "loop.gif";
-  const gifPath = path.join(absDir, primaryGifName);
-  fs.writeFileSync(gifPath, gifBuf);
-  if (isShowcase) {
-    // Also write loop.gif alias for uniform tooling
-    fs.writeFileSync(path.join(absDir, "loop.gif"), gifBuf);
+  const stem = isShowcase ? "showcase" : "loop";
+  const files = {};
+  const notes = [];
+
+  if (formats.includes("png") || formats.includes("poster")) {
+    const posterBuf = encodePNG(frames[0], width, height);
+    const posterPath = path.join(absDir, "poster.png");
+    fs.writeFileSync(posterPath, posterBuf);
+    files.poster = { path: posterPath, bytes: posterBuf.length, kb: Number((posterBuf.length / 1024).toFixed(1)) };
   }
 
-  // 3. Measure seam on full render
+  if (formats.includes("gif")) {
+    const gifBuf = encodeGIF(frames, width, height, fps);
+    const gifPath = path.join(absDir, `${stem}.gif`);
+    fs.writeFileSync(gifPath, gifBuf);
+    if (isShowcase) {
+      fs.writeFileSync(path.join(absDir, "loop.gif"), gifBuf);
+    }
+    const delayCs = Math.max(2, Math.round(100 / fps));
+    const effectiveGifFps = Number((100 / delayCs).toFixed(1));
+    if (fps > 50) {
+      notes.push(`GIF89a frame delay caps at 2cs (${effectiveGifFps}fps); use MP4 or WebP for true ${fps}fps playback.`);
+    }
+    files.gif = {
+      path: gifPath,
+      bytes: gifBuf.length,
+      kb: Number((gifBuf.length / 1024).toFixed(1)),
+      effectiveFps: effectiveGifFps
+    };
+  }
+
+  if (formats.includes("mp4")) {
+    if (caps.macosAVFoundation || caps.ffmpeg) {
+      const mp4Path = path.join(absDir, `${stem}.mp4`);
+      try {
+        const res = encodeMP4(frames, width, height, fps, mp4Path);
+        files.mp4 = {
+          path: res.path,
+          backend: res.backend,
+          fps,
+          bytes: res.bytes,
+          kb: Number((res.bytes / 1024).toFixed(1))
+        };
+      } catch (err) {
+        if (flags.formats) {
+          throw err;
+        }
+        notes.push(`Skipped default MP4: ${err.message.split("\n")[0]}`);
+      }
+    } else {
+      notes.push("Skipped MP4: install ffmpeg or run on macOS with Swift AVFoundation.");
+    }
+  }
+
+  if (formats.includes("webp")) {
+    if (caps.animatedWebP) {
+      const webpPath = path.join(absDir, `${stem}.webp`);
+      const res = encodeAnimatedWebP(frames, width, height, fps, webpPath);
+      files.webp = {
+        path: res.path,
+        backend: res.backend,
+        fps,
+        bytes: res.bytes,
+        kb: Number((res.bytes / 1024).toFixed(1))
+      };
+    } else {
+      notes.push("Skipped WebP: requires cwebp + webpmux or ffmpeg.");
+    }
+  }
+
+  if (formats.includes("webm")) {
+    if (caps.ffmpeg) {
+      const webmPath = path.join(absDir, `${stem}.webm`);
+      const res = encodeWebM(frames, width, height, fps, webmPath);
+      files.webm = {
+        path: res.path,
+        backend: res.backend,
+        fps,
+        bytes: res.bytes,
+        kb: Number((res.bytes / 1024).toFixed(1))
+      };
+    } else {
+      notes.push("Skipped WebM: install ffmpeg (`brew install ffmpeg`) for VP9 WebM encoding.");
+    }
+  }
+
   const seam = analyzeSeam(frames, width, height);
   fs.writeFileSync(path.join(absDir, "seam.json"), JSON.stringify(seam, null, 2) + "\n", "utf8");
 
@@ -276,10 +398,8 @@ async function cmdRender(targetDir) {
         totalFrames,
         seamScore: seam.seamScore,
         duplicateFrames: seam.duplicateFrames,
-        files: {
-          gif: { path: gifPath, bytes: gifBuf.length, kb: Number((gifBuf.length / 1024).toFixed(1)) },
-          poster: { path: posterPath, bytes: posterBuf.length, kb: Number((posterBuf.length / 1024).toFixed(1)) }
-        }
+        files,
+        ...(notes.length ? { notes } : {})
       },
       null,
       2
@@ -288,7 +408,7 @@ async function cmdRender(targetDir) {
 }
 
 function cmdDoctor() {
-  const hasFFmpeg = detectFFmpeg();
+  const caps = detectCapabilities();
   const chromePaths = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "/usr/bin/google-chrome",
@@ -305,7 +425,9 @@ function cmdDoctor() {
           softCanvas2D: true,
           pureJsGif89a: true,
           pureJsPng: true,
-          ffmpeg: hasFFmpeg,
+          macosAVFoundation: caps.macosAVFoundation,
+          animatedWebP: caps.animatedWebP,
+          ffmpeg: caps.ffmpeg,
           headlessChrome: Boolean(chromeFound),
           chromePath: chromeFound
         }
@@ -320,14 +442,14 @@ function printHelp() {
   console.log(`Loop Studio CLI (loop) — Deterministic Seamless Animation & Showcase Engine
 
 Usage:
-  loop new <dir> [--mode showcase|ambient] [--scene <id>] [--style <id>] [--palette <id>]
+  loop new <dir> [--mode showcase|ambient] [--scene <id>] [--style <id>] [--palette <id>] [--fps <n>]
   loop sheet <dir> [--every <n>] [--cols <n>]
   loop story <dir>
   loop seam <dir>
   loop legible <dir>
   loop source-check <dir> [--repo <root>]
   loop audit <dir> [--repo <root>]
-  loop render <dir>
+  loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png|all] [--width <n>] [--height <n>]
   loop serve <dir> [--port 4173]
   loop doctor
 `);
@@ -344,13 +466,13 @@ async function main() {
         await cmdSheet(dir, flags);
         break;
       case "story":
-        await cmdStory(dir);
+        await cmdStory(dir, flags);
         break;
       case "seam":
-        await cmdSeam(dir);
+        await cmdSeam(dir, flags);
         break;
       case "legible":
-        await cmdLegible(dir);
+        await cmdLegible(dir, flags);
         break;
       case "source-check":
         await cmdSourceCheck(dir, flags);
@@ -359,7 +481,7 @@ async function main() {
         await cmdAudit(dir, flags);
         break;
       case "render":
-        await cmdRender(dir);
+        await cmdRender(dir, flags);
         break;
       case "serve":
         serveLoop(dir, Number(flags.port || 4173), path.join(REPO_ROOT, "tool/lib/loop-kit.js"));

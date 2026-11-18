@@ -206,9 +206,9 @@ loop-studio/
 | `loop legible <dir>` | Verify reading duration (`>= 0.5 + 0.3*words`), WCAG `4.5:1` contrast & phone margins | `legible.json` |
 | `loop source-check <dir> [--repo <root>]` | Verify every `file:line` source citation in `showcase.json` exists | `sources.json` |
 | `loop audit <dir> [--repo <root>]` | Run `seam`, `legible`, and `source-check` together as a single gate | `audit.json` |
-| `loop render <dir>` | Render full-resolution `showcase.gif` / `loop.gif` and `poster.png` | `loop.gif`, `poster.png`, `seam.json` |
+| `loop render <dir> [--fps <n>] [--formats gif,mp4,webp,webm,png\|all]` | Render full-resolution `showcase.gif` / `loop.gif`, `poster.png`, `loop.mp4` (`30–120 fps` via FFmpeg or macOS AVFoundation), Animated `.webp`, and `.webm` | `loop.gif`, `loop.mp4`, `poster.png`, `seam.json` |
 | `loop serve <dir> [--port 4173]` | Launch interactive browser workbench with phase scrubber & 400px phone view | `http://localhost:4173` |
-| `loop doctor` | Check runtime engines (SoftCanvas2D, GIF89a, PNG, FFmpeg, Chrome) | JSON diagnostic |
+| `loop doctor` | Check runtime engines (SoftCanvas2D, GIF89a, PNG, macOS AVFoundation, Animated WebP, FFmpeg, Chrome) | JSON diagnostic |
 
 ---
 
