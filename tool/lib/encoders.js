@@ -1,8 +1,16 @@
-// Loop Studio — Pure-JS PNG & GIF89a Encoders + Optional FFmpeg Driver
-// Zero external npm dependencies required; uses Node's built-in node:zlib.
+// Loop Studio — Pure-JS PNG & GIF89a Encoders + Native MP4 (AVFoundation/FFmpeg), WebM & Animated WebP
+// Zero external npm dependencies required.
 
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import zlib from "node:zlib";
+import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const SWIFT_MP4_SCRIPT = path.resolve(__dirname, "../scripts/encode-mp4.swift");
 
 const CRC_TABLE = new Uint32Array(256);
 for (let n = 0; n < 256; n++) {
@@ -31,7 +39,7 @@ function pngChunk(type, data) {
   return Buffer.concat([len, typeBuf, data, crcBuf]);
 }
 
-export function encodePNG(rgba, width, height) {
+export function encodePNG(rgba, width, height, compressionLevel = 6) {
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
@@ -53,7 +61,7 @@ export function encodePNG(rgba, width, height) {
     }
   }
 
-  const compressed = zlib.deflateSync(raw, { level: 6 });
+  const compressed = zlib.deflateSync(raw, { level: compressionLevel });
   return Buffer.concat([
     signature,
     pngChunk("IHDR", ihdr),
@@ -73,7 +81,6 @@ function buildGlobalPalette(frames, width, height) {
     const data = frames[f];
     for (let p = 0; p < totalPixels; p += pixStep) {
       const idx = p * 4;
-      // Quantize to 6-6-6 bits (18-bit key) to preserve exact UI/palette colors and smooth steps
       const r = data[idx] & 0xfc;
       const g = data[idx + 1] & 0xfc;
       const b = data[idx + 2] & 0xfc;
@@ -89,7 +96,6 @@ function buildGlobalPalette(frames, width, height) {
     const r = (key >> 16) & 0xff;
     const g = (key >> 8) & 0xff;
     const b = key & 0xff;
-    // Avoid adding near-duplicate colors if we have plenty of candidates
     let tooClose = false;
     if (sorted.length > 256 && palette.length > 16) {
       for (let i = 0; i < palette.length; i++) {
@@ -106,7 +112,6 @@ function buildGlobalPalette(frames, width, height) {
     if (!tooClose) palette.push([r, g, b]);
   }
 
-  // Fill any remaining slots if needed
   for (const [key] of sorted) {
     if (palette.length >= 256) break;
     const r = (key >> 16) & 0xff;
@@ -153,8 +158,8 @@ function mapFrameToIndices(rgba, totalPixels, palette, cache) {
 // LZW encoder for GIF89a 8-bit indices
 function lzwEncode(indices) {
   const minCodeSize = 8;
-  const clearCode = 1 << minCodeSize; // 256
-  const eoiCode = clearCode + 1; // 257
+  const clearCode = 1 << minCodeSize;
+  const eoiCode = clearCode + 1;
 
   const outBytes = [];
   let bitBuf = 0;
@@ -170,9 +175,8 @@ function lzwEncode(indices) {
     }
   }
 
-  let codeSize = minCodeSize + 1; // 9
-  let nextCode = eoiCode + 1; // 258
-  // Flat hash table / Map from (prefix << 8) | suffix -> code
+  let codeSize = minCodeSize + 1;
+  let nextCode = eoiCode + 1;
   let table = new Map();
 
   emitCode(clearCode, codeSize);
@@ -208,7 +212,6 @@ function lzwEncode(indices) {
     outBytes.push(bitBuf & 0xff);
   }
 
-  // Pack into GIF sub-blocks of max 255 bytes
   const chunks = [Buffer.from([minCodeSize])];
   let offset = 0;
   while (offset < outBytes.length) {
@@ -221,7 +224,7 @@ function lzwEncode(indices) {
     chunks.push(block);
     offset += size;
   }
-  chunks.push(Buffer.from([0x00])); // Block terminator
+  chunks.push(Buffer.from([0x00]));
   return Buffer.concat(chunks);
 }
 
@@ -229,15 +232,16 @@ export function encodeGIF(frames, width, height, fps = 24) {
   const palette = buildGlobalPalette(frames, width, height);
   const cache = new Map();
   const totalPixels = width * height;
+  // GIF89a stores frame delay in centiseconds; 2cs (50fps) is the fastest reliable browser speed
   const delayCs = Math.max(2, Math.round(100 / fps));
 
   const header = Buffer.alloc(13);
   header.write("GIF89a", 0, "ascii");
   header.writeUInt16LE(width, 6);
   header.writeUInt16LE(height, 8);
-  header[10] = 0xf7; // Global Color Table flag (1), color res (7), sort (0), size 2^(7+1)=256
-  header[11] = 0; // bg color index
-  header[12] = 0; // pixel aspect ratio
+  header[10] = 0xf7;
+  header[11] = 0;
+  header[12] = 0;
 
   const gct = Buffer.alloc(256 * 3);
   for (let i = 0; i < 256; i++) {
@@ -246,7 +250,6 @@ export function encodeGIF(frames, width, height, fps = 24) {
     gct[i * 3 + 2] = palette[i][2];
   }
 
-  // Netscape 2.0 infinite loop extension
   const netscape = Buffer.from([
     0x21, 0xff, 0x0b,
     0x4e, 0x45, 0x54, 0x53, 0x43, 0x41, 0x50, 0x45, 0x32, 0x2e, 0x30,
@@ -257,32 +260,224 @@ export function encodeGIF(frames, width, height, fps = 24) {
 
   for (let f = 0; f < frames.length; f++) {
     const gce = Buffer.alloc(8);
-    gce[0] = 0x21; // Extension Introducer
-    gce[1] = 0xf9; // Graphic Control Label
-    gce[2] = 0x04; // Byte size
-    gce[3] = 0x04; // Disposal method 1 (Do not dispose / overwrite)
+    gce[0] = 0x21;
+    gce[1] = 0xf9;
+    gce[2] = 0x04;
+    gce[3] = 0x04;
     gce.writeUInt16LE(delayCs, 4);
     gce[6] = 0x00;
     gce[7] = 0x00;
 
     const imgDesc = Buffer.alloc(10);
-    imgDesc[0] = 0x2c; // Image Separator
+    imgDesc[0] = 0x2c;
     imgDesc.writeUInt16LE(0, 1);
     imgDesc.writeUInt16LE(0, 3);
     imgDesc.writeUInt16LE(width, 5);
     imgDesc.writeUInt16LE(height, 7);
-    imgDesc[9] = 0x00; // Use Global Color Table
+    imgDesc[9] = 0x00;
 
     const indices = mapFrameToIndices(frames[f], totalPixels, palette, cache);
     const lzw = lzwEncode(indices);
     parts.push(gce, imgDesc, lzw);
   }
 
-  parts.push(Buffer.from([0x3b])); // GIF Trailer
+  parts.push(Buffer.from([0x3b]));
   return Buffer.concat(parts);
 }
 
+function findBinary(name, extraPaths = []) {
+  const direct = spawnSync("which", [name], { encoding: "utf8" });
+  if (direct.status === 0 && direct.stdout.trim()) {
+    return direct.stdout.trim().split("\n")[0];
+  }
+  for (const p of extraPaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
 export function detectFFmpeg() {
-  const res = spawnSync("ffmpeg", ["-version"], { encoding: "utf8" });
-  return res.status === 0;
+  return Boolean(findBinary("ffmpeg", ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"]));
+}
+
+export function detectCapabilities() {
+  const ffmpegPath = findBinary("ffmpeg", ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"]);
+  const swiftPath = process.platform === "darwin" ? findBinary("swift", ["/usr/bin/swift"]) : null;
+  const cwebpPath = findBinary("cwebp", ["/opt/homebrew/bin/cwebp", "/usr/local/bin/cwebp"]);
+  const webpmuxPath = findBinary("webpmux", ["/opt/homebrew/bin/webpmux", "/usr/local/bin/webpmux"]);
+
+  return {
+    ffmpeg: Boolean(ffmpegPath),
+    ffmpegPath,
+    macosAVFoundation: Boolean(swiftPath && fs.existsSync(SWIFT_MP4_SCRIPT)),
+    swiftPath,
+    animatedWebP: Boolean((cwebpPath && webpmuxPath) || ffmpegPath),
+    cwebpPath,
+    webpmuxPath
+  };
+}
+
+export function encodeMP4(frames, width, height, fps = 30, outPath) {
+  const caps = detectCapabilities();
+  const absOut = path.resolve(outPath);
+
+  if (caps.ffmpegPath) {
+    const tmpRaw = path.join(os.tmpdir(), `loop-studio-${process.pid}-${Date.now()}.rgba`);
+    try {
+      const fd = fs.openSync(tmpRaw, "w");
+      for (const frame of frames) fs.writeSync(fd, frame);
+      fs.closeSync(fd);
+
+      const res = spawnSync(
+        caps.ffmpegPath,
+        [
+          "-y",
+          "-f", "rawvideo",
+          "-pix_fmt", "rgba",
+          "-s", `${width}x${height}`,
+          "-r", String(fps),
+          "-i", tmpRaw,
+          "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+          "-c:v", "libx264",
+          "-pix_fmt", "yuv420p",
+          "-movflags", "+faststart",
+          "-crf", "17",
+          absOut
+        ],
+        { encoding: "utf8" }
+      );
+      if (res.status !== 0) {
+        throw new Error(`ffmpeg MP4 encoding failed: ${res.stderr}`);
+      }
+      return { backend: "ffmpeg", path: absOut, bytes: fs.statSync(absOut).size };
+    } finally {
+      if (fs.existsSync(tmpRaw)) fs.unlinkSync(tmpRaw);
+    }
+  }
+
+  if (caps.macosAVFoundation) {
+    const tmpRaw = path.join(os.tmpdir(), `loop-studio-${process.pid}-${Date.now()}.rgba`);
+    try {
+      const fd = fs.openSync(tmpRaw, "w");
+      for (const frame of frames) fs.writeSync(fd, frame);
+      fs.closeSync(fd);
+
+      const res = spawnSync(
+        caps.swiftPath,
+        [SWIFT_MP4_SCRIPT, tmpRaw, String(width), String(height), String(fps), String(frames.length), absOut],
+        { encoding: "utf8" }
+      );
+      if (res.status !== 0) {
+        throw new Error(`macOS AVFoundation MP4 encoding failed: ${res.stderr || res.stdout}`);
+      }
+      return { backend: "macos-avfoundation", path: absOut, bytes: fs.statSync(absOut).size };
+    } finally {
+      if (fs.existsSync(tmpRaw)) fs.unlinkSync(tmpRaw);
+    }
+  }
+
+  throw new Error("No MP4 encoder found (install ffmpeg or run on macOS with Swift AVFoundation).");
+}
+
+export function encodeWebM(frames, width, height, fps = 30, outPath) {
+  const caps = detectCapabilities();
+  if (!caps.ffmpegPath) {
+    throw new Error("WebM encoding requires ffmpeg (install via `brew install ffmpeg`).");
+  }
+  const absOut = path.resolve(outPath);
+  const tmpRaw = path.join(os.tmpdir(), `loop-studio-webm-${process.pid}-${Date.now()}.rgba`);
+  try {
+    const fd = fs.openSync(tmpRaw, "w");
+    for (const frame of frames) fs.writeSync(fd, frame);
+    fs.closeSync(fd);
+
+    const res = spawnSync(
+      caps.ffmpegPath,
+      [
+        "-y",
+        "-f", "rawvideo",
+        "-pix_fmt", "rgba",
+        "-s", `${width}x${height}`,
+        "-r", String(fps),
+        "-i", tmpRaw,
+        "-c:v", "libvpx-vp9",
+        "-pix_fmt", "yuv420p",
+        "-b:v", "0",
+        "-crf", "24",
+        absOut
+      ],
+      { encoding: "utf8" }
+    );
+    if (res.status !== 0) {
+      throw new Error(`ffmpeg WebM encoding failed: ${res.stderr}`);
+    }
+    return { backend: "ffmpeg", path: absOut, bytes: fs.statSync(absOut).size };
+  } finally {
+    if (fs.existsSync(tmpRaw)) fs.unlinkSync(tmpRaw);
+  }
+}
+
+export function encodeAnimatedWebP(frames, width, height, fps = 30, outPath) {
+  const caps = detectCapabilities();
+  const absOut = path.resolve(outPath);
+  const durationMs = Math.max(8, Math.round(1000 / fps));
+
+  if (caps.cwebpPath && caps.webpmuxPath) {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "loop-studio-webp-"));
+    try {
+      const muxArgs = [];
+      for (let i = 0; i < frames.length; i++) {
+        const pngPath = path.join(tmpDir, `f_${i}.png`);
+        const webpPath = path.join(tmpDir, `f_${i}.webp`);
+        fs.writeFileSync(pngPath, encodePNG(frames[i], width, height, 1));
+        const cw = spawnSync(caps.cwebpPath, ["-quiet", "-q", "88", pngPath, "-o", webpPath], { encoding: "utf8" });
+        if (cw.status !== 0) {
+          throw new Error(`cwebp failed on frame ${i}: ${cw.stderr}`);
+        }
+        muxArgs.push("-frame", webpPath, `+${durationMs}+0+0+1-b`);
+      }
+      muxArgs.push("-loop", "0", "-o", absOut);
+
+      const mux = spawnSync(caps.webpmuxPath, muxArgs, { encoding: "utf8" });
+      if (mux.status !== 0) {
+        throw new Error(`webpmux failed: ${mux.stderr}`);
+      }
+      return { backend: "cwebp+webpmux", path: absOut, bytes: fs.statSync(absOut).size };
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  }
+
+  if (caps.ffmpegPath) {
+    const tmpRaw = path.join(os.tmpdir(), `loop-studio-webp-${process.pid}-${Date.now()}.rgba`);
+    try {
+      const fd = fs.openSync(tmpRaw, "w");
+      for (const frame of frames) fs.writeSync(fd, frame);
+      fs.closeSync(fd);
+      const res = spawnSync(
+        caps.ffmpegPath,
+        [
+          "-y",
+          "-f", "rawvideo",
+          "-pix_fmt", "rgba",
+          "-s", `${width}x${height}`,
+          "-r", String(fps),
+          "-i", tmpRaw,
+          "-vcodec", "libwebp",
+          "-loop", "0",
+          "-q:v", "85",
+          absOut
+        ],
+        { encoding: "utf8" }
+      );
+      if (res.status !== 0) {
+        throw new Error(`ffmpeg WebP encoding failed: ${res.stderr}`);
+      }
+      return { backend: "ffmpeg", path: absOut, bytes: fs.statSync(absOut).size };
+    } finally {
+      if (fs.existsSync(tmpRaw)) fs.unlinkSync(tmpRaw);
+    }
+  }
+
+  throw new Error("No Animated WebP encoder found (requires cwebp+webpmux or ffmpeg).");
 }

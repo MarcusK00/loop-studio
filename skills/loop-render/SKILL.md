@@ -59,14 +59,20 @@ node tool/bin/loop.js audit <dir> --repo <repo-root>
 
 ### 8. Final Render (`loop render`)
 Renders all $N$ frames (`0..N-1`) at full resolution and encodes:
-- `loop.gif` (or `showcase.gif` in showcase mode) using adaptive 256-color quantization + LZW encoding (or FFmpeg two-pass `palettegen`/`paletteuse` when FFmpeg is installed)
+- `loop.gif` (or `showcase.gif` in showcase mode) using adaptive 256-color quantization + LZW encoding (GIF89a frame delays use integer centiseconds, capping reliable browser playback at `50 fps` / `2 cs`)
 - `poster.png` (Frame `0` at full resolution)
-- `loop.mp4` / `showcase.mp4` (`H.264 yuv420p` when FFmpeg is installed)
+- `loop.mp4` / `showcase.mp4` (`H.264 yuv420p` at exact requested `fps` — `24`, `30`, `60`, or `120 fps` — via **FFmpeg** or native **macOS AVFoundation**)
+- `loop.webp` / `showcase.webp` (24-bit Animated WebP with exact millisecond frame timing at `30–60+ fps` via `cwebp`+`webpmux` or FFmpeg)
 - `loop.webm` (`VP9` when FFmpeg is installed and `--formats webm` is requested)
 
 ```bash
-node tool/bin/loop.js render <dir> --formats gif,png,mp4
+node tool/bin/loop.js render <dir> --fps 60 --formats mp4,webp,gif,png
 ```
+
+> [!TIP]
+> **Choosing Frame Rates (`> 20 fps`)**:
+> - For **GIFs**, use `20`, `25`, `30` (`3 cs` ≈ `33.3 fps`), or `50 fps` (`2 cs`, maximum reliable browser GIF speed).
+> - For **true `30 / 60 / 120 fps` smooth video**, pass `--fps 60` with `--formats mp4,webp,png` (MP4 files are typically `4×–10×` smaller than GIFs with zero 256-color banding).
 
 ### 9. Live Interactive Workbench (`loop serve`)
 Opens an interactive studio in the browser with a frame-exact phase scrubber, live seam-jump bar chart, mobile width toggle, and instant PNG/sheet export:
